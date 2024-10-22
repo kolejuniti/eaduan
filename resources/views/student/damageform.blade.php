@@ -74,7 +74,7 @@
                     {{-- Selain Asrama --}}
                     <div id="lainSection" style="display: none;">
                         <div class="row g-2 mb-3 row-cols-2">
-                            <div class="col-md-12 col-sm-12 form-floating">
+                            <div class="col-md-12 col-sm-12 col-12 form-floating">
                                 <select name="no_unit" id="no_unit_id" class="form-control" required>
                                     <option value="">Pilihan Lokasi</option>
                                     @foreach($locations as $group_name => $locationNames)
