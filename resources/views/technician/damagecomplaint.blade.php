@@ -20,6 +20,17 @@
                                 <label for="end_date" class="fw-bold">Tarikh Akhir</label>
                             </div>
                         </div>
+                        <div class="row mt-1 g-2 row-cols-2">
+                            <div class="col-md-6 col-sm-6 form-floating">
+                                <select name="status" id="status" class="form-control">
+                                    <option value="">Pilihan Status</option>
+                                    @foreach ($status as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                </select>
+                                <label for="status">Status</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-footer">
                         <div class="col-sm-12 text-center">

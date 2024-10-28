@@ -56,20 +56,37 @@
                     </div>
                     {{-- Asrama --}}
                     <div id="asramaSection" style="display: none;">
-                        <div class="row g-2 mb-3 row-cols-2">
-                            <div class="col-md-3 col-sm-3 form-floating">
-                                <input type="text" name="block" id="block" class="form-control" placeholder="" value="{{ $hostel->block ?? 'Tiada Maklumat' }}" readonly>
-                                <label for="block">Blok</label>
+                        @if ($hostel !== null)
+                            <div class="row g-2 mb-3 row-cols-2">
+                                <div class="col-md-3 col-sm-3 form-floating">
+                                    <input type="text" name="block" id="block" class="form-control" placeholder="" value="{{ $hostel->block ?? 'Tiada Maklumat' }}" readonly>
+                                    <label for="block">Blok</label>
+                                </div>
+                                <div class="col-md-3 col-sm-3 form-floating">
+                                    <input type="text" name="no_unit" id="no_unit" class="form-control" placeholder="" value="{{ $hostel->room ?? 'Tiada Maklumat' }}" readonly>
+                                    <label for="no_unit">No. Unit</label>
+                                </div>
+                                <div class="col-md-6 col-sm-6 col-12 form-floating">
+                                    <input type="text" name="location" id="location" class="form-control" placeholder="" value="{{ $hostel->location ?? 'Tiada Maklumat' }}" readonly>
+                                    <label for="location">Lokasi</label>
+                                </div>
                             </div>
-                            <div class="col-md-3 col-sm-3 form-floating">
-                                <input type="text" name="no_unit" id="no_unit" class="form-control" placeholder="" value="{{ $hostel->room ?? 'Tiada Maklumat' }}" readonly>
-                                <label for="no_unit">No. Unit</label>
+                        @else
+                            <div class="row g-2 mb-3 row-cols-2">
+                                <div class="col-md-3 col-sm-3 form-floating">
+                                    <input type="text" name="block" id="block" class="form-control" placeholder="" required>
+                                    <label for="block">Blok</label>
+                                </div>
+                                <div class="col-md-3 col-sm-3 form-floating">
+                                    <input type="text" name="no_unit" id="no_unit" class="form-control" placeholder="" required>
+                                    <label for="no_unit">No. Unit</label>
+                                </div>
+                                <div class="col-md-6 col-sm-6 col-12 form-floating">
+                                    <input type="text" name="location" id="location" class="form-control" placeholder="" value="UNITI VILLAGE" readonly>
+                                    <label for="location">Lokasi</label>
+                                </div>
                             </div>
-                            <div class="col-md-6 col-sm-6 col-12 form-floating">
-                                <input type="text" name="location" id="location" class="form-control" placeholder="" value="{{ $hostel->location ?? 'Tiada Maklumat' }}" readonly>
-                                <label for="location">Lokasi</label>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                     {{-- Selain Asrama --}}
                     <div id="lainSection" style="display: none;">

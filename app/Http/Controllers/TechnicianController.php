@@ -124,6 +124,9 @@ class TechnicianController extends Controller
     {
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date') ?? $start_date;
+        $withStatus = $request->input('status');
+
+        $status = DB::table('status')->get();
 
         // If start_date is null, set it to today's date
         if (is_null($start_date)) {
@@ -135,7 +138,7 @@ class TechnicianController extends Controller
         }
 
         $complaintLists = DB::query()
-        ->fromSub(function ($query) use ($start_date, $end_date) { // Pass the dates into the closure
+        ->fromSub(function ($query) use ($start_date, $end_date, $withStatus) { // Pass the dates into the closure
             $query->from(DB::table('damage_complaints')
                 ->join('eduhub.students', 'damage_complaints.ic', '=', 'eduhub.students.ic')
                 ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
@@ -147,6 +150,9 @@ class TechnicianController extends Controller
                                     ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
                 ->where('eduhub.students.status', '2')
                 ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date]) // Filter by date_of_complaint
+                ->when($withStatus, function ($query) use ($withStatus) {
+                    return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
+                })
                 ->select(
                     'damage_complaints.id',
                     'eduhub.students.name AS complainant_name',
@@ -173,6 +179,9 @@ class TechnicianController extends Controller
                                             (SELECT MAX(id) FROM damage_complaint_logs AS logs WHERE logs.damage_complaint_id = damage_complaint_logs.damage_complaint_id)
                                             ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
                         ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date]) // Filter by date_of_complaint
+                        ->when($withStatus, function ($query) use ($withStatus) {
+                            return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
+                        })
                         ->select(
                             'damage_complaints.id',
                             'eduhub.users.name AS complainant_name',
@@ -193,7 +202,7 @@ class TechnicianController extends Controller
         ->orderBy('combined_complaint_lists.created_at', 'DESC')
         ->get();
 
-        return view('technician.damagecomplaint', compact('complaintLists', 'start_date', 'end_date'));
+        return view('technician.damagecomplaint', compact('complaintLists', 'start_date', 'end_date', 'status'));
     }
 
     public function complaintListDetails(Request $request)
