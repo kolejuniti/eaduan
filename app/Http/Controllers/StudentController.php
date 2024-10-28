@@ -50,6 +50,8 @@ class StudentController extends Controller
             ->select('tblblock.location AS location', 'tblblock.name AS block', 'tblblock_unit.no_unit AS room')
             ->first();
 
+        $hostel->block = $hostel->block ?? 'Tiada Maklumat';
+
         return view('student.damageform', compact('student', 'hostel', 'damagetypes', 'locations'));
     }
 
