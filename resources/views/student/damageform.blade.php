@@ -60,7 +60,7 @@
                             <div class="row g-2 mb-3 row-cols-2">
                                 <div class="col-md-3 col-sm-3 form-floating">
                                     <input type="text" name="block" id="block" class="form-control" placeholder="" value="{{ $hostel->block ?? 'Tiada Maklumat' }}" readonly>
-                                    <label for="block">Blokx</label>
+                                    <label for="block">Blok</label>
                                 </div>
                                 <div class="col-md-3 col-sm-3 form-floating">
                                     <input type="text" name="no_unit" id="no_unit" class="form-control" placeholder="" value="{{ $hostel->room ?? 'Tiada Maklumat' }}" readonly>
