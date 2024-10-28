@@ -15,6 +15,15 @@
                                 <input type="month" name="month" id="month" class="form-control" placeholder="">
                                 <label for="month" class="fw-bold">Bulan</label>
                             </div>
+                            <div class="col-md-6 col-sm-6 form-floating">
+                                <select name="damagetype" id="damagetype" class="form-control">
+                                    <option value="">Pilihan Kategori</option>
+                                    @foreach ($damageTypes as $damageType)
+                                        <option value="{{ $damageType->id }}">{{ $damageType->name }}</option>
+                                    @endforeach
+                                </select>                                
+                                <label for="category" class="fw-bold">Kategori</label>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -67,6 +76,7 @@
                         </tr>
                         @endforeach
                     </tbody>
+                    @if ($damagetype === null)
                     <tfoot class="table-danger">
                         <tr>
                             <td>Jumlah</td>
@@ -85,6 +95,7 @@
                             <td>{{ $overallTotal }}</td>
                         </tr>
                     </tfoot>
+                    @endif
                 </table>
             </div>
         </div>

@@ -392,6 +392,7 @@ class TechnicianController extends Controller
 
     public function damageReport(Request $request)
     {
+        $damagetype = $request->input('damagetype');
         $month = $request->input('month');
 
         // Get the date range based on the provided month or the last 7 days
@@ -413,7 +414,12 @@ class TechnicianController extends Controller
         $lastDate = $dates->last();    // Last date in the collection
 
         // Fetch damage types and statuses
-        $damageTypes = DB::table('damage_types')->get();
+        if ($damagetype === null) {
+            $damageTypes = DB::table('damage_types')->get();
+        } else {
+            $damageTypes = DB::table('damage_types')->where('damage_types.id', $damagetype)->get();
+        }
+
         $status = DB::table('status')->whereIn('id', [1, 2, 3])->get(['id', 'name']);
 
         // Retrieve the latest logs for each complaint based on the latest `damage_complaint_log` entry (using MAX id)
@@ -433,7 +439,7 @@ class TechnicianController extends Controller
         // Structure data for output
         $totalByDamageStatus = [];
         $totalByStatus = [];
-
+        
         foreach ($damageTypes as $damageType) {
             foreach ($dates as $date) {
                 foreach ($status as $stat) {
@@ -460,7 +466,7 @@ class TechnicianController extends Controller
         }
 
         // Pass data to the view
-        return view('technician.damagereport', compact('dates', 'status', 'damageTypes', 'totalByDamageStatus', 'totalByStatus', 'firstDate', 'lastDate'));
+        return view('technician.damagereport', compact('dates', 'status', 'damageTypes', 'totalByDamageStatus', 'totalByStatus', 'firstDate', 'lastDate', 'damagetype'));
     }
 
 }
