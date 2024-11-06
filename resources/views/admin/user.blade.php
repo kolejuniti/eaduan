@@ -72,6 +72,7 @@
                     <th>#</th>
                     <th>Nama Pegawai</th>
                     <th>Email</th>
+                    <th>Bahagian / Unit</th>
                     <th>Aktif</th>
                 </tr>
             </thead>
@@ -81,6 +82,7 @@
                     <td></td>
                     <td>{{ $item->name }}</td>
                     <td>{{ $item->email }}</td>
+                    <td>{{ $item->section }}</td>
                     <form method="POST" action="{{ route('admin.user.update', $item->id) }}" id="form-{{ $item->id }}">
                         @csrf
                         <td style="display: flex; justify-content: center; align-items: center;">

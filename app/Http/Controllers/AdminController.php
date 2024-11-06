@@ -18,7 +18,13 @@ class AdminController extends Controller
 
     public function user()
     {
-        $users = DB::table('users')->where('type',2)->orderBy('name')->get();
+        $users = DB::table('users')
+            ->join('sections', 'users.section_id', '=', 'sections.id')
+            ->select('users.id', 'users.name', 'users.email', 'users.status', 'sections.name AS section')
+            ->where('type',2)
+            ->orderBy('users.name')
+            ->get();
+
         $sections = DB::table('sections')->get();
 
         return view('admin.user', compact('users', 'sections'));

@@ -64,11 +64,11 @@ class LoginController extends Controller
             }
 
             // If none of the types match, you can add a fallback
-            return redirect()->route('login')->with('error', 'Invalid user type.');
+            return redirect()->route('login')->with('error', 'Jenis pengguna tidak sah.');
         }
 
         // Failed login attempt
-        return redirect()->route('login')->with('error', 'Invalid email or password.');
+        return redirect()->route('login')->with('error', 'Salah email atau kata laluan.');
     }
 
     public function logout(Request $request)
