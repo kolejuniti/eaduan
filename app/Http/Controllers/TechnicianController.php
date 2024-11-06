@@ -32,7 +32,7 @@ class TechnicianController extends Controller
                     'damage_complaints.block',
                     'damage_complaints.no_unit',
                     'damage_complaints.created_at',
-                    DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"), 
+                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                     'latest_log.latest_status_id'
             );
 
@@ -55,7 +55,7 @@ class TechnicianController extends Controller
                     'damage_complaints.block',
                     'damage_complaints.no_unit',
                     'damage_complaints.created_at',
-                    DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"), 
+                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                     'latest_log.latest_status_id'
             );
 
@@ -85,7 +85,7 @@ class TechnicianController extends Controller
                     'damage_complaints.block',
                     'damage_complaints.no_unit',
                     'damage_complaints.created_at',
-                    DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"), 
+                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                     'latest_log.latest_status_id'
             );
 
@@ -108,7 +108,7 @@ class TechnicianController extends Controller
                     'damage_complaints.block',
                     'damage_complaints.no_unit',
                     'damage_complaints.created_at',
-                    DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"), 
+                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"), 
                     'latest_log.latest_status_id'
             );
 
@@ -161,7 +161,7 @@ class TechnicianController extends Controller
                     'damage_complaints.block',
                     'damage_complaints.no_unit',
                     'damage_complaints.created_at',
-                    DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                     DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                     DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                     DB::raw("DATEDIFF(NOW(), damage_complaints.date_of_complaint) as days_since_complaint"),
@@ -190,7 +190,7 @@ class TechnicianController extends Controller
                             'damage_complaints.block',
                             'damage_complaints.no_unit',
                             'damage_complaints.created_at',
-                            DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                            DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                             DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                             DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                             DB::raw("DATEDIFF(NOW(), damage_complaints.date_of_complaint) as days_since_complaint"),
@@ -233,7 +233,7 @@ class TechnicianController extends Controller
                         'damage_complaints.block',
                         'damage_complaints.no_unit',
                         'damage_complaints.created_at',
-                        DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                        DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                         DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                         DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                         'damage_complaints.technician_id',
@@ -262,7 +262,7 @@ class TechnicianController extends Controller
                             'damage_complaints.block',
                             'damage_complaints.no_unit',
                             'damage_complaints.created_at',
-                            DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                            DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                             DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                             DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                             'damage_complaints.technician_id',
@@ -392,6 +392,90 @@ class TechnicianController extends Controller
 
     public function damageReport(Request $request)
     {
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date') ?? $start_date;
+        $withStatus = $request->input('status');
+
+        $status = DB::table('status')->get(['id', 'name']);
+
+        if (is_null($start_date)) {
+            // Set default to 3 days ago, start of the day
+            $start_date = now()->subDays(3)->startOfDay()->format('Y-m-d'); 
+            
+            // Set end date to the current time (end of today)
+            $end_date = now()->endOfDay()->format('Y-m-d');
+        }
+
+        $complaintLists = DB::query()
+        ->fromSub(function ($query) use ($start_date, $end_date, $withStatus) { // Pass the dates into the closure
+            $query->from(DB::table('damage_complaints')
+                ->join('eduhub.students', 'damage_complaints.ic', '=', 'eduhub.students.ic')
+                ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
+                ->join('damage_type_details', 'damage_complaints.damage_type_detail_id', '=', 'damage_type_details.id')
+                ->leftJoin(DB::raw('(SELECT damage_complaint_logs.damage_complaint_id, status.name AS latest_status, status.id AS latest_status_id 
+                                    FROM damage_complaint_logs
+                                    JOIN status ON damage_complaint_logs.status_id = status.id
+                                    WHERE damage_complaint_logs.id = 
+                                    (SELECT MAX(id) FROM damage_complaint_logs AS logs WHERE logs.damage_complaint_id = damage_complaint_logs.damage_complaint_id)
+                                    ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
+                ->where('eduhub.students.status', '2')
+                ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date]) // Filter by date_of_complaint
+                ->when($withStatus, function ($query) use ($withStatus) {
+                    return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
+                })
+                ->select(
+                            'damage_complaints.id',
+                            DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                            'damage_types.name AS damage_type',
+                            'damage_type_details.name AS damage_type_detail',
+                            'damage_complaints.notes',
+                            'eduhub.students.name AS complainant_name',
+                            'damage_complaints.phone_number',
+                            'damage_complaints.block',
+                            'damage_complaints.no_unit',
+                            'latest_log.latest_status',
+                            'latest_log.latest_status_id',
+                            'damage_complaints.created_at'
+                )
+                ->union(
+                    DB::table('damage_complaints')
+                        ->join('eduhub.users', 'damage_complaints.ic', '=', 'eduhub.users.ic')
+                        ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
+                        ->join('damage_type_details', 'damage_complaints.damage_type_detail_id', '=', 'damage_type_details.id')
+                        ->leftJoin(DB::raw('(SELECT damage_complaint_logs.damage_complaint_id, status.name AS latest_status, status.id AS latest_status_id  
+                                            FROM damage_complaint_logs
+                                            JOIN status ON damage_complaint_logs.status_id = status.id
+                                            WHERE damage_complaint_logs.id = 
+                                            (SELECT MAX(id) FROM damage_complaint_logs AS logs WHERE logs.damage_complaint_id = damage_complaint_logs.damage_complaint_id)
+                                            ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
+                        ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date]) // Filter by date_of_complaint
+                        ->when($withStatus, function ($query) use ($withStatus) {
+                            return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
+                        })
+                        ->select(
+                            'damage_complaints.id',
+                            DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                            'damage_types.name AS damage_type',
+                            'damage_type_details.name AS damage_type_detail',
+                            'damage_complaints.notes',
+                            'eduhub.users.name AS complainant_name',
+                            'damage_complaints.phone_number',
+                            'damage_complaints.block',
+                            'damage_complaints.no_unit',
+                            'latest_log.latest_status',
+                            'latest_log.latest_status_id',
+                            'damage_complaints.created_at'
+                        )
+                ));
+        }, 'combined_complaint_lists')
+        ->orderBy('combined_complaint_lists.created_at', 'DESC')
+        ->get(); 
+
+        return view('technician.damagereportlist', compact('start_date', 'end_date', 'complaintLists', 'status'));
+    }
+
+    public function damageStatistic(Request $request)
+    {
         $damagetype = $request->input('damagetype');
         $month = $request->input('month');
 
@@ -425,7 +509,8 @@ class TechnicianController extends Controller
         // Retrieve the latest logs for each complaint based on the latest `damage_complaint_log` entry (using MAX id)
         $latestLogs = DB::table('damage_complaint_logs as dcl')
             ->join('damage_complaints as dc', 'dcl.damage_complaint_id', '=', 'dc.id')
-            ->select('dc.damage_type_id', 'dcl.status_id', DB::raw('COUNT(*) as total'), DB::raw('DATE_FORMAT(dc.date_of_complaint, "%Y-%m-%d") as complaint_date'))
+            ->select('dc.damage_type_id', 'dcl.status_id', DB::raw('COUNT(*) as total'), 
+            DB::raw('DATE_FORMAT(dc.date_of_complaint, "%Y-%m-%d") as complaint_date'))
             ->whereIn('dcl.status_id', $status->pluck('id'))
             ->whereIn(DB::raw('DATE_FORMAT(dc.date_of_complaint, "%Y-%m-%d")'), $dates)
             ->whereIn(DB::raw('dcl.id'), function($query) {

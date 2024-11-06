@@ -23,7 +23,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th>Tarikh Aduan</th>
+                            <th>Tarikh & Masa</th>
                             <th>Kategori</th>
                             <th>Nama Pengadu</th>
                             <th>No. Telefon</th>
@@ -100,7 +100,7 @@
                                 <table class="table table-bordered table-sm text-center mb-3">
                                     <thead class="table-dark">
                                         <tr>
-                                            <th>Tarikh</th>
+                                            <th>Tarikh & Masa</th>
                                             <th>Bahagian / Unit</th>
                                             <th>Jenis Aduan</th>
                                             <th>Catatan</th>
@@ -325,14 +325,27 @@
                                 $('#date_of_action-container').html(''); // Clear the container if status_id === 4
                             }
 
-                            if (complaintData.status_id !== 4) {
+                            if (complaintData.status_id === 2) {
+                                // Show textarea if status_id is 2
+                                $('#action_notes-container').html(`
+                                    <div class="row mb-1">
+                                        <div class="col-md-2">
+                                            <label for="action_notes" class="fw-bold">Tindakan</label>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <textarea name="action_notes" id="action_notes" rows="2" class="form-control" required>${complaintData.action_notes ?? ''}</textarea>
+                                        </div>
+                                    </div>
+                                `);
+                            } else if (complaintData.status_id !== 4) {
+                                // Show action notes if available, otherwise show the textarea
                                 if (complaintData.action_notes) {
                                     $('#action_notes-container').html(`
                                         <div class="row mb-1">
                                             <div class="col-md-2">
                                                 <label for="action_notes" class="fw-bold">Tindakan</label>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-10">
                                                 <label for="action_notes">${complaintData.action_notes}</label>
                                             </div>
                                         </div>
@@ -350,7 +363,8 @@
                                     `);
                                 }
                             } else {
-                                $('#action_notes-container').html(''); // Clear the container if status_id === 4
+                                // Clear the container if status_id === 4
+                                $('#action_notes-container').html('');
                             }
 
                             // Handle status
@@ -405,6 +419,14 @@
                             }
 
                             if (complaintData.date_of_action === null && complaintData.status_id !== 4) {
+                                $('#save-container').html(`
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-danger open-cancel-modal" data-id="${complaintData.id}" data-bs-toggle="modal" data-bs-target="#cancelModal">Batal</button>
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                    </div>
+                                `);
+                            } else if (complaintData.date_of_action !== null && complaintData.status_id === 2) {
                                 $('#save-container').html(`
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-sm btn-danger open-cancel-modal" data-id="${complaintData.id}" data-bs-toggle="modal" data-bs-target="#cancelModal">Batal</button>

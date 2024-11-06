@@ -6,7 +6,11 @@
         <div class="col-md-8 col-sm-8 col-12">
             @if (session('success'))
                 <div class="alert alert-success">
-                    {{ session('success') }}
+                    <ul>
+                        @foreach (session('success') as $success)
+                            <li>{{ $success }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
             <div class="card">

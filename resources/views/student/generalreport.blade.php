@@ -7,10 +7,11 @@
         <div class="col-md-12 col-sm-12 col-12">
             <div class="table-responsive">
                 <table id="myTable" class="table table-bordered small table-sm text-center">
+                    <caption>Aduan umum akan diselesaikan dalam tempoh masa 7 hari bekerja.</caption>
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th>Tarikh Aduan</th>
+                            <th>Tarikh & Masa</th>
                             <th>Bahagian / Unit</th>
                             <th>Jenis Aduan</th>
                             <th>Tarikh Terima</th>

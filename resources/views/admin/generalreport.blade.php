@@ -5,22 +5,12 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12 col-sm-12 col-12">
-            <div class="card mb-3">
+            <div class="col-md-3 col-sm-3 col-12 ms-auto">
                 <form method="POST" action="{{ route('admin.generalReport') }}">
-                    @csrf
-                    <div class="card-header">{{ __('Carian Senarai Umum') }}</div>
-                    <div class="card-body">
-                        <div class="row g-2 row-cols-2">
-                            <div class="col-md-6 col-sm-6 form-floating">
-                                <input type="month" name="month" id="month" class="form-control" placeholder="">
-                                <label for="month" class="fw-bold">Bulan</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="col-sm-12 text-center">
-                            <button class="btn btn-warning" type="submit">Cari</button>
-                        </div>
+                @csrf
+                    <div class="input-group mb-3">
+                        <input type="month" class="form-control" name="month">
+                        <button class="btn btn-warning" type="submit">Cari</button>
                     </div>
                 </form>
             </div>

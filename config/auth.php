@@ -38,7 +38,7 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users', // For admin and technician
+            'provider' => 'users', // For admin, technician and PIC
         ],
 
         'staff' => [

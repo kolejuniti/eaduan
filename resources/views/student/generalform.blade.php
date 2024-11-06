@@ -6,7 +6,11 @@
         <div class="col-md-8 col-sm-8 col-12">
             @if (session('success'))
                 <div class="alert alert-success">
-                    {{ session('success') }}
+                    <ul>
+                        @foreach (session('success') as $success)
+                            <li>{{ $success }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
             <div class="card">
@@ -59,15 +63,6 @@
                     </div>
                     <div class="row g-2 mb-2 row-cols-1">
                         <div class="col-md-6 col-sm-6 form-floating">
-                            <select name="section" id="section" class="form-control" required>
-                                <option value="">Pilihan Bahagian / Unit</option>
-                                @foreach ($sections as $section)
-                                    <option value="{{ $section->id }}">{{ $section->name }}</option>
-                                @endforeach
-                            </select>
-                            <label for="section">Bahagian / Unit</label>
-                        </div>
-                        <div class="col-md-6 col-sm-6 form-floating">
                             <select name="complaintType" id="complaintType" class="form-control" required>
                                 <option value="">Pilihan Jenis Aduan</option>
                                 @foreach ($complaintTypes as $complaintType)
@@ -87,7 +82,7 @@
                         </div>
                     </div>
                     <div class="mb-2 form-floating">
-                        <textarea name="notes" id="notes" class="form-control" required></textarea>
+                        <textarea name="notes" id="notes" class="form-control" placeholder="" required></textarea>
                         <label for="notes">Catatan</label>
                     </div>
                 </div>

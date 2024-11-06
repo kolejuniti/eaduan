@@ -19,12 +19,15 @@ class AdminController extends Controller
     public function user()
     {
         $users = DB::table('users')->where('type',2)->orderBy('name')->get();
+        $sections = DB::table('sections')->get();
 
-        return view('admin.user', compact('users'));
+        return view('admin.user', compact('users', 'sections'));
     }
 
     public function addUser(Request $request)
     {
+        $section = $request->input('section');
+
         // Validate request data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
@@ -37,6 +40,7 @@ class AdminController extends Controller
             'email' => $validatedData['email'],
             'password' => Hash::make('12345678'),  // Consider using random password generation or user-defined
             'type' => ('2'),  // Assuming type 2 is predefined as "pic"
+            'section_id' => $section,
             'status' => ('1'),  // Assuming status 1 is predefined as "active"
         ]);
 
@@ -62,6 +66,9 @@ class AdminController extends Controller
     {
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date') ?? $start_date;
+        $withStatus = $request->input('status');
+
+        $status = DB::table('status')->get();
 
         // If start_date is null, set it to today's date
         if (is_null($start_date)) {
@@ -73,7 +80,7 @@ class AdminController extends Controller
         }
 
         $complaintLists = DB::query()
-        ->fromSub(function ($query) use ($start_date, $end_date) { // Pass the dates into the closure
+        ->fromSub(function ($query) use ($start_date, $end_date, $withStatus) { // Pass the dates into the closure
             $query->from(DB::table('damage_complaints')
                 ->join('eduhub.students', 'damage_complaints.ic', '=', 'eduhub.students.ic')
                 ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
@@ -85,6 +92,10 @@ class AdminController extends Controller
                                     ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
                 ->where('eduhub.students.status', '2')
                 ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date]) // Filter by date_of_complaint
+                 // Filter by date_of_complaint
+                 ->when($withStatus, function ($query) use ($withStatus) {
+                    return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
+                })
                 ->select(
                     'damage_complaints.id',
                     'eduhub.students.name AS complainant_name',
@@ -93,7 +104,7 @@ class AdminController extends Controller
                     'damage_complaints.block',
                     'damage_complaints.no_unit',
                     'damage_complaints.created_at',
-                    DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                     DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                     DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                     DB::raw("DATEDIFF(NOW(), damage_complaints.date_of_complaint) as days_since_complaint"),
@@ -110,7 +121,11 @@ class AdminController extends Controller
                                             WHERE damage_complaint_logs.id = 
                                             (SELECT MAX(id) FROM damage_complaint_logs AS logs WHERE logs.damage_complaint_id = damage_complaint_logs.damage_complaint_id)
                                             ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
-                        ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date]) // Filter by date_of_complaint
+                        ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date])
+                         // Filter by date_of_complaint
+                        ->when($withStatus, function ($query) use ($withStatus) {
+                            return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
+                        }) // Filter by date_of_complaint
                         ->select(
                             'damage_complaints.id',
                             'eduhub.users.name AS complainant_name',
@@ -119,7 +134,7 @@ class AdminController extends Controller
                             'damage_complaints.block',
                             'damage_complaints.no_unit',
                             'damage_complaints.created_at',
-                            DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                            DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                             DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                             DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                             DB::raw("DATEDIFF(NOW(), damage_complaints.date_of_complaint) as days_since_complaint"),
@@ -131,7 +146,7 @@ class AdminController extends Controller
         ->orderBy('combined_complaint_lists.created_at', 'DESC')
         ->get();
 
-        return view('admin.damagecomplaint', compact('complaintLists', 'start_date', 'end_date'));
+        return view('admin.damagecomplaint', compact('complaintLists', 'start_date', 'end_date', 'status'));
     }
 
     public function damageComplaintDetails(Request $request)
@@ -156,7 +171,7 @@ class AdminController extends Controller
                         'damage_complaints.block',
                         'damage_complaints.no_unit',
                         'damage_complaints.created_at',
-                        DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                        DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                         DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                         DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                         'damage_complaints.technician_id',
@@ -178,7 +193,7 @@ class AdminController extends Controller
                             'damage_complaints.block',
                             'damage_complaints.no_unit',
                             'damage_complaints.created_at',
-                            DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                            DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                             DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                             DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                             'damage_complaints.technician_id',
@@ -217,14 +232,29 @@ class AdminController extends Controller
         return view('admin.damagecomplaint', compact('complaintLists', 'complaintLogs', 'technicians', 'status'));
     }
 
-    public function generalComplaintLists()
+    public function generalComplaintLists(Request $request)
     {   
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date') ?? $start_date;
+        $withStatus = $request->input('status');
+
+        $status = DB::table('status')->get();
+
+        // If start_date is null, set it to today's date
+        if (is_null($start_date)) {
+            // Set default to 3 days ago, start of the day
+            $start_date = now()->subDays(3)->startOfDay()->format('Y-m-d'); 
+            
+            // Set end date to the current time (end of today)
+            $end_date = now()->endOfDay()->format('Y-m-d');
+        }
+
         $complaintLists = DB::table('general_complaints')
             ->join('eduhub.students', 'general_complaints.ic', '=', 'eduhub.students.ic')
-            ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
+            ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
             ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
             ->join('status', 'general_complaints.status_id', '=', 'status.id')
-            ->select(DB::raw("DATE_FORMAT(general_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+            ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 'general_complaints.id',
                 'general_complaints.category',
                 'eduhub.students.name AS complainant_name',
@@ -238,13 +268,17 @@ class AdminController extends Controller
                 'general_complaints.status_id AS status_id',
                 'general_complaints.created_at'
             )
+            ->whereBetween(DB::raw("CAST(general_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date])
+            ->when($withStatus, function ($query, $withStatus) {
+                return $query->where('general_complaints.status_id', '=', $withStatus);
+            })
             ->union(
                 DB::table('general_complaints')
                     ->join('eduhub.users', 'general_complaints.ic', '=', 'eduhub.users.ic')
-                    ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
+                    ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
                     ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
                     ->join('status', 'general_complaints.status_id', '=', 'status.id')
-                    ->select(DB::raw("DATE_FORMAT(general_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                    ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                         'general_complaints.id',
                         'general_complaints.category',
                         'eduhub.users.name AS complainant_name', // Change to 'users' table name here
@@ -258,11 +292,15 @@ class AdminController extends Controller
                         'general_complaints.status_id AS status_id',
                         'general_complaints.created_at'
                     )
+                    ->whereBetween(DB::raw("CAST(general_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date])
+                    ->when($withStatus, function ($query, $withStatus) {
+                        return $query->where('general_complaints.status_id', '=', $withStatus);
+                    })
             )
             ->orderBy('created_at', 'DESC') // Order by the field in the combined result
             ->get();
 
-        return view('admin.generalcomplaint', compact('complaintLists'));
+        return view('admin.generalcomplaint', compact('complaintLists', 'start_date', 'end_date', 'status'));
     }
 
     public function generalComplaintDetails(Request $request)
@@ -271,11 +309,11 @@ class AdminController extends Controller
 
         $complaintLists = DB::table('general_complaints')
             ->join('eduhub.students', 'general_complaints.ic', '=', 'eduhub.students.ic')
-            ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
+            ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
             ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
             ->join('status', 'general_complaints.status_id', '=', 'status.id')
             ->leftjoin('eaduan.users', 'general_complaints.user_id', '=', 'eaduan.users.id')
-            ->select(DB::raw("DATE_FORMAT(general_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+            ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 'general_complaints.id AS id',
                 'eduhub.students.name AS complainant_name',
                 'general_complaints.phone_number AS phone_number',
@@ -289,17 +327,18 @@ class AdminController extends Controller
                 'general_complaints.user_id AS user_id',
                 'general_complaints.status_id AS status_id',
                 'general_complaints.cancel_notes AS cancel_notes',
-                'eaduan.users.name AS user_name'
+                'eaduan.users.name AS user_name',
+                'general_complaints.section_id AS section_id'
             )
             ->where('general_complaints.id', '=', $id) // Filter by the complaint ID
             ->union(
                 DB::table('general_complaints')
                     ->join('eduhub.users', 'general_complaints.ic', '=', 'eduhub.users.ic')
-                    ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
+                    ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
                     ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
                     ->join('status', 'general_complaints.status_id', '=', 'status.id')
                     ->leftjoin('eaduan.users', 'general_complaints.user_id', '=', 'eaduan.users.id')
-                    ->select(DB::raw("DATE_FORMAT(general_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                    ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                         'general_complaints.id AS id',
                         'eduhub.users.name AS complainant_name', // From 'users' table
                         'general_complaints.phone_number AS phone_number',
@@ -313,7 +352,8 @@ class AdminController extends Controller
                         'general_complaints.user_id AS user_id',
                         'general_complaints.status_id AS status_id',
                         'general_complaints.cancel_notes AS cancel_notes',
-                        'eaduan.users.name AS user_name'
+                        'eaduan.users.name AS user_name',
+                        'general_complaints.section_id AS section_id'
                     )
                     ->where('general_complaints.id', '=', $id) // Filter by the complaint ID
             )
@@ -321,27 +361,31 @@ class AdminController extends Controller
 
         $users = DB::table('users')->where('type',2)->orderBy('name')->get();
 
+        //fetch section
+        $sections = DB::table('sections')->get();
+
         if ($request->ajax()) {
-            return response()->json(['complaintLists' => $complaintLists, 'users' => $users]);
+            return response()->json(['complaintLists' => $complaintLists, 'users' => $users, 'sections' => $sections]);
         }
 
-        return view('admin.generalcomplaint', compact('complaintLists', 'users'));
+        return view('admin.generalcomplaint', compact('complaintLists', 'users', 'sections'));
     }
 
     public function complaintUpdate(Request $request, $id) 
     {
         $date_of_receipt = $request->input('date_of_receipt');
         $user = $request->input('user');
+        $section = $request->input('section');
 
         DB::table('general_complaints')
                 ->where('general_complaints.id', $id)
                 ->update([
                     'date_of_receipt' => $date_of_receipt, 
-                    'user_id' => $user,
+                    'section_id' => $section,
                     'status_id' => 2
                 ]);
 
-        return redirect()->route('admin.generalcomplaint')->with('success', 'Aduan telah dikemaskini dan diserahkan kepada pegawai yang terlibat.');
+        return redirect()->route('admin.generalcomplaint')->with('success', 'Aduan telah dikemaskini dan diserahkan kepada bahagian / unit yang terlibat.');
     }
 
     public function complaintCancel(Request $request, $id) 

@@ -122,7 +122,7 @@ Route::prefix('admin')->middleware(['auth', 'user-access:admin'])->group(functio
     Route::post('/user/update/{id}', [AdminController::class, 'updateUser'])->name('admin.user.update');
     Route::match(['get', 'post'], '/complaint/damage', [AdminController::class, 'damageComplaintLists'])->name('admin.damagecomplaint');    
     Route::post('/complaint/damage/detail', [AdminController::class, 'damageComplaintDetails'])->name('admin.damagecomplaint.detail');
-    Route::get('/complaint/general', [AdminController::class, 'generalComplaintLists'])->name('admin.generalcomplaint');
+    Route::match(['get', 'post'], '/complaint/general', [AdminController::class, 'generalComplaintLists'])->name('admin.generalcomplaint');
     Route::post('/complaint/general/detail', [AdminController::class, 'generalComplaintDetails'])->name('admin.generalcomplaint.detail');
     Route::put('/complaint/general/{id}/update', [AdminController::class, 'complaintUpdate'])->name('admin.generalcomplaint.update');
     Route::put('/complaint/general/{id}/cancel', [AdminController::class, 'complaintCancel'])->name('admin.generalcomplaint.cancel');
@@ -141,7 +141,8 @@ Route::prefix('technician')->middleware(['auth', 'user-access:technician'])->gro
     Route::put('/complaint/damage/{id}/update', [TechnicianController::class, 'complaintUpdate'])->name('technician.damagecomplaint.update');
     Route::put('/complaint/damage/{id}/cancel', [TechnicianController::class, 'complaintCancel'])
     ->name('technician.damagecomplaint.cancel');
-    Route::match(['get', 'post'], '/report/damage', [TechnicianController::class, 'damageReport'])->name('technician.damageReport');  
+    Route::match(['get', 'post'], '/report/damage', [TechnicianController::class, 'damageReport'])->name('technician.damageReportList');  
+    Route::match(['get', 'post'], '/statistic/damage', [TechnicianController::class, 'damageStatistic'])->name('technician.damageReport');  
 
     // Logout route
     Route::post('/logout', [LoginController::class, 'logout'])->name('technician.logout');

@@ -16,7 +16,11 @@
                     @endif
                     @if (session('error'))
                         <div class="alert alert-danger">
-                            {{ session('error') }}
+                            <ul>
+                                @foreach(session('error') as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     @endif<div class="text-center mb-1">
                         <a href="{{ route('student.login') }}">

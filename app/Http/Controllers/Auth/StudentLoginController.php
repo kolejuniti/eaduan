@@ -38,7 +38,11 @@ class StudentLoginController extends Controller
         }
 
         // If unsuccessful, redirect back with input
-        return redirect()->back()->with('error', 'Salah no. matriks atau kata laluan tidak sah.');
+        return redirect()->back()->with('error', [
+            'Salah no. matriks',
+            'Kata laluan tidak sah.',
+            'Status pelajar tidak aktif.'
+        ]);
     }
 
     public function logout()

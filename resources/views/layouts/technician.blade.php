@@ -86,7 +86,10 @@
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-list"></i>&nbsp;Laporan Aduan</a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('technician.damageReport') }}">Kerosakan</a>
+                                    <a class="dropdown-item" href="{{ route('technician.damageReportList') }}">Senarai Kerosakan</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('technician.damageReport') }}">Statistik Kerosakan</a>
                                 </li>
                             </ul>
                         </li>

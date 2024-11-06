@@ -5,6 +5,23 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12 col-sm-12 col-12">
+            <div class="col-md-6 col-sm-6 col-12 ms-auto">
+                <form method="POST" action="{{ route('admin.generalcomplaint') }}">
+                @csrf
+                    <div class="input-group mb-3">
+                        <input type="date" class="form-control" name="start_date">
+                        <button class="btn btn-secondary" disabled>-</button>
+                        <input type="date" class="form-control" name="end_date">
+                        <select name="status" id="status" class="form-control">
+                            <option value="">Pilihan Status</option>
+                            @foreach ($status as $item)
+                                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                            @endforeach
+                        </select>
+                        <button class="btn btn-warning" type="submit">Cari</button>
+                    </div>
+                </form>
+            </div>
             @if(session('success'))
                 <div class="alert alert-success">
                     {{ session('success') }}
@@ -20,17 +37,18 @@
             @endif
             <div class="table-responsive">
                 <table id="myTable" class="table table-bordered small table-sm text-center">
+                    <caption>Senarai yang dipaparkan adalah dari tarikh {{ \Carbon\Carbon::parse($start_date)->format('d-m-Y') }} sehingga {{ \Carbon\Carbon::parse($end_date)->format('d-m-Y') }}</caption>
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th>Tarikh Aduan</th>
+                            <th>Tarikh & Masa</th>
                             <th>Kategori</th>
                             <th>Nama Pengadu</th>
                             <th>No. Telefon</th>
-                            <th>Bahagian / Unit</th>
                             <th>Jenis Aduan</th>
                             <th>Lokasi</th>
                             <th>Tarikh Terima</th>
+                            <th>Bahagian / Unit</th>
                             <th>Tarikh Tindakan</th>
                             <th>Status</th>
                         </tr>
@@ -55,10 +73,10 @@
                                 <button type="button" class="btn btn-sm btn-link text-uppercase open-modal" data-id="{{ $data->id }}">{{ $data->complainant_name }}</button>
                             </td>
                             <td class="text-center">{{ $data->phone_number }}</td>
-                            <td>{{ $data->section }}</td>
                             <td>{{ $data->complaint_type }}</td>
                             <td>{{ $data->location }}</td>
                             <td>{{ $data->date_of_receipt }}</td>
+                            <td>{{ $data->section }}</td>
                             <td>{{ $data->date_of_action }}</td>
                             <td>{{ $data->status }}</td>
                         </tr>
@@ -100,8 +118,7 @@
                                 <table class="table table-bordered table-sm text-center mb-3">
                                     <thead class="table-dark">
                                         <tr>
-                                            <th>Tarikh</th>
-                                            <th>Bahagian / Unit</th>
+                                            <th>Tarikh & Masa</th>
                                             <th>Jenis Aduan</th>
                                             <th>Catatan</th>
                                             <th>Status</th>
@@ -109,8 +126,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td style="width: 15%;"><label id="complaint-date_of_complaint"></label></td>
-                                            <td style="width: 20%;"><label id="complaint-section"></label></td>
+                                            <td style="width: 20%;"><label id="complaint-date_of_complaint"></label></td>
                                             <td style="width: 15%;"><label id="complaint-complaint_type"></label></td>
                                             <td><label id="complaint-notes"></label></td>
                                             <td style="width: 15%;"><label id="complaint-status"></label></td>
@@ -119,10 +135,13 @@
                                 </table>  
                                 <div id="date_of_receipt-container">
                                     <!-- date_of_receipt will be loaded here -->
+                                </div>   
+                                <div id="section-container">
+                                    <!-- section will be loaded here -->
                                 </div> 
                                 <div id="pic-container">
                                     <!-- pic will be loaded here -->
-                                </div>  
+                                </div>
                                 <div id="date_of_action-container">
                                     <!-- date_of_action will be loaded here -->
                                 </div> 
@@ -248,7 +267,6 @@
                             $('#complaint-complainant_name').text(complaintData.complainant_name);
                             $('#complaint-phone_number').text(complaintData.phone_number);
                             $('#complaint-date_of_complaint').text(complaintData.date_of_complaint);
-                            $('#complaint-section').text(complaintData.section);
                             $('#complaint-complaint_type').text(complaintData.complaint_type);
                             $('#complaint-notes').html(complaintData.notes.replace(/\n/g, '<br>'));
                             $('#complaint-status').text(complaintData.status);
@@ -292,7 +310,7 @@
                                     $('#pic-container').html(`
                                         <div class="row mb-1">
                                             <div class="col-md-2">
-                                                <label for="user" class="fw-bold">Pegawai</label>
+                                                <label for="user" class="fw-bold">Tindakan Oleh</label>
                                             </div>
                                             <div class="col-md-4">
                                                 <label for="user">${complaintData.user_name}</label>
@@ -300,22 +318,45 @@
                                         </div>
                                     `);
                                 } else {
-                                    $('#pic-container').html(`
+                                    $('#pic-container').html('');
+                                }
+                            } else {
+                                $('#pic-container').html(''); // Clear the container if status_id === 4
+                            }
+
+                            let sectionOptions = response.sections.map((section) => 
+                                `<option value="${section.id}">${section.name}</option>`
+                            ).join('');
+
+                            if (complaintData.status_id !== 4) {
+                                if (complaintData.section_id) {
+                                    $('#section-container').html(`
                                         <div class="row mb-1">
                                             <div class="col-md-2">
-                                                <label for="user" class="fw-bold">Pegawai</label>
+                                                <label for="section" class="fw-bold">Bahagian / Unit</label>
                                             </div>
-                                            <div class="col-md-4">
-                                                <select name="user" class="form-control form-control-sm" required>
+                                            <div class="col-md-6">
+                                                <label for="section">${complaintData.section}</label>
+                                            </div>
+                                        </div>
+                                    `);
+                                } else {
+                                    $('#section-container').html(`
+                                        <div class="row mb-1">
+                                            <div class="col-md-2">
+                                                <label for="section" class="fw-bold">Bahagian / Unit</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <select name="section" class="form-control form-control-sm" required>
                                                     <option value="" selected disabled></option>
-                                                    ${userOptions}
+                                                    ${sectionOptions}
                                                 </select>
                                             </div>
                                         </div>
                                     `);
                                 }
                             } else {
-                                $('#pic-container').html(''); // Clear the container if status_id === 4
+                                $('#section-container').html(''); // Clear the container if status_id === 4
                             }
 
                             // Handle date_of_receipt
@@ -372,7 +413,20 @@
                                 $('#cancel_notes-container').html('');
                             }
 
-                            if (complaintData.date_of_action === null && complaintData.status_id !== 4) {
+                            if (
+                                complaintData.date_of_action === null &&
+                                complaintData.status_id !== 4 &&
+                                complaintData.section_id !== null
+                            ) {
+                                $('#save-container').html(`
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                `);
+                            } else if (
+                                complaintData.date_of_action === null &&
+                                complaintData.status_id !== 4
+                            ) {
                                 $('#save-container').html(`
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-sm btn-danger open-cancel-modal" data-id="${complaintData.id}" data-bs-toggle="modal" data-bs-target="#cancelModal">Batal</button>

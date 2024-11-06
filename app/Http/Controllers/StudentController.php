@@ -81,7 +81,7 @@ class StudentController extends Controller
             'type_of_user'=>2,
             'date_of_complaint'=>$date_of_complaint,
             'phone_number'=>$phone,
-            'block'=>strtoupper($block),
+            'block'=>$block,
             'no_unit'=>$no_unit,
             'location'=>$location,
             'damage_type_id'=>$damage_type,
@@ -97,13 +97,16 @@ class StudentController extends Controller
         ]);
 
         // Redirect to the desired route with a success message
-        return redirect()->back()->with('success', 'Your damage complaint has been successfully submitted.');
+        return redirect()->back()->with('success', [
+            'Aduan kerosakan anda telah berjaya dihantar.',
+            'Aduan kerosakan anda akan diselesaikan dalam tempoh masa 7 hari berkerja.'
+        ]);
     }
 
     public function showGeneralForm()
     {   
         //fetch section
-        $sections = DB::table('sections')->get();
+        // $sections = DB::table('sections')->get();
         //fetch general complaints
         $complaintTypes = DB::table('complaint_types')->get();
 
@@ -111,7 +114,7 @@ class StudentController extends Controller
         $student = Auth::guard('student')->user();
         $student_ic = $student->ic;
 
-        return view('student.generalform', compact('student', 'sections', 'complaintTypes'));
+        return view('student.generalform', compact('student', 'complaintTypes'));
     }
 
     public function submitGeneralForm(Request $request)
@@ -123,7 +126,7 @@ class StudentController extends Controller
         $date_of_complaint = $request->input('date_of_complaint');
         $phone = $request->input('phone');
         $category = $request->input('category');
-        $section = $request->input('section');
+        // $section = $request->input('section');
         $complaint_type = $request->input('complaintType');
         $location = $request->input('location');
         $notes = $request->input('notes');
@@ -134,7 +137,7 @@ class StudentController extends Controller
             'date_of_complaint'=>$date_of_complaint,
             'phone_number'=>$phone,
             'category'=>$category,
-            'section_id'=>$section,
+            // 'section_id'=>$section,
             'complaint_type_id'=>$complaint_type,
             'location'=>strtoupper($location),
             'notes'=>ucfirst($notes),
@@ -142,7 +145,10 @@ class StudentController extends Controller
         ]);
 
         // Redirect to the desired route with a success message
-        return redirect()->back()->with('success', 'Your general complaint has been successfully submitted.');
+        return redirect()->back()->with('success', [
+            'Aduan umum anda telah berjaya dihantar.',
+            'Aduan umum anda akan diselesaikan dalam tempoh masa 7 hari berkerja.'
+        ]);
     }
 
     public function damageComplaintList()
@@ -163,7 +169,7 @@ class StudentController extends Controller
             ->where('damage_complaints.ic', '=', $student_ic) // Using exact match
             ->select(
                 'damage_complaints.id AS id',
-                DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                 DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
                 'damage_types.name AS damage_types',
@@ -186,7 +192,7 @@ class StudentController extends Controller
             ->where('damage_complaints.id', '=', $id)
             ->select(
                 'damage_complaints.id AS id',
-                DB::raw("DATE_FORMAT(damage_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 'damage_complaints.block',
                 'damage_complaints.no_unit',
                 'damage_types.name AS damage_type',
@@ -231,12 +237,12 @@ class StudentController extends Controller
         $student_ic = $student->ic;
 
         $generalLists = DB::table('general_complaints')
-            ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
+            ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
             ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
             ->join('status', 'general_complaints.status_id', '=', 'status.id')
             ->where('general_complaints.ic', 'LIKE', "{$student_ic}")
             ->select(
-                DB::raw("DATE_FORMAT(general_complaints.date_of_complaint, '%d-%m-%Y') as date_of_complaint"),
+                DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 'sections.name AS section', 'complaint_types.name AS complaint_types',
                 DB::raw("DATE_FORMAT(general_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                 DB::raw("DATE_FORMAT(general_complaints.date_of_receipt, '%d-%m-%Y') as date_of_receipt"),

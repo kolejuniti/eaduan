@@ -5,26 +5,20 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12 col-sm-12 col-12">
-            <div class="card mb-3">
+            <div class="col-md-6 col-sm-6 col-12 ms-auto">
                 <form method="POST" action="{{ route('admin.damagecomplaint') }}">
-                    @csrf
-                    <div class="card-header">{{ __('Carian Senarai Kerosakan') }}</div>
-                    <div class="card-body">
-                        <div class="row g-2 row-cols-2">
-                            <div class="col-md-6 col-sm-6 form-floating">
-                                <input type="date" name="start_date" id="start_date" class="form-control" placeholder="">
-                                <label for="start_date" class="fw-bold">Tarikh Mula</label>
-                            </div>
-                            <div class="col-md-6 col-sm-6 form-floating">
-                                <input type="date" name="end_date" id="end_date" class="form-control" placeholder="">
-                                <label for="end_date" class="fw-bold">Tarikh Akhir</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="col-sm-12 text-center">
-                            <button class="btn btn-warning" type="submit">Cari</button>
-                        </div>
+                @csrf
+                    <div class="input-group mb-3">
+                        <input type="date" class="form-control" name="start_date">
+                        <button class="btn btn-secondary" disabled>-</button>
+                        <input type="date" class="form-control" name="end_date">
+                        <select name="status" id="status" class="form-control">
+                            <option value="">Pilihan Status</option>
+                            @foreach ($status as $item)
+                                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                            @endforeach
+                        </select>
+                        <button class="btn btn-warning" type="submit">Cari</button>
                     </div>
                 </form>
             </div>
@@ -47,7 +41,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th>Tarikh Aduan</th>
+                            <th>Tarikh & Masa</th>
                             <th>Kategori</th>
                             <th>Nama Pengadu</th>
                             <th>No. Telefon</th>
@@ -133,7 +127,7 @@
                                 <table class="table table-bordered table-sm text-center mb-1">
                                     <thead class="table-dark">
                                         <tr>
-                                            <th>Tarikh</th>
+                                            <th>Tarikh & Masa</th>
                                             <th>Blok</th>
                                             <th>No. Unit</th>
                                             <th>Kategori</th>

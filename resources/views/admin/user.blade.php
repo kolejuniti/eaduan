@@ -43,6 +43,17 @@
                                         <label for="name">Email</label>
                                     </div>
                                 </div>
+                                <div class="col-md-12 col-sm-12 mb-2">
+                                    <div class="form-floating">
+                                        <select name="section" id="section" class="form-control" required>
+                                            <option value="">Pilihan Bahagian / Unit</option>
+                                            @foreach ($sections as $section)
+                                                <option value="{{ $section->id }}">{{ $section->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <label for="section">Jenis Bahagian / Unit</label>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>

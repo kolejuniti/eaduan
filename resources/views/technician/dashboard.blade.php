@@ -13,7 +13,7 @@
         <thead class="table-dark">
             <tr>
                 <th>#</th>
-                <th>Tarikh Aduan</th>
+                <th>Tarikh & Masa</th>
                 <th>Kategori</th>
                 <th>Nama Pengadu</th>
                 <th>No. Telefon</th>
@@ -25,7 +25,7 @@
             @foreach ($newComplaintLists as $item)
             <tr class="table-info">
                 <td style="width: 1%;"></td>
-                <td style="width: 10%;">{{ $item->date_of_complaint }}</td>
+                <td style="width: 15%;">{{ $item->date_of_complaint }}</td>
                 <td style="width: 10%;">{{ $item->damage_type }}</td>
                 <td>{{ $item->complainant_name }}</td>
                 <td class="text-center" style="width: 10%;">{{ $item->phone_number }}</td>
@@ -42,7 +42,7 @@
         <thead class="table-dark">
             <tr>
                 <th>#</th>
-                <th>Tarikh Aduan</th>
+                <th>Tarikh & Masa</th>
                 <th>Kategori</th>
                 <th>Nama Pengadu</th>
                 <th>No. Telefon</th>
@@ -54,7 +54,7 @@
             @foreach ($inProgressComplaint as $item)
             <tr class="table-warning">
                 <td style="width: 1%;"></td>
-                <td style="width: 10%;">{{ $item->date_of_complaint }}</td>
+                <td style="width: 15%;">{{ $item->date_of_complaint }}</td>
                 <td style="width: 10%;">{{ $item->damage_type }}</td>
                 <td>{{ $item->complainant_name }}</td>
                 <td class="text-center" style="width: 10%;">{{ $item->phone_number }}</td>
