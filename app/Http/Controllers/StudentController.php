@@ -87,6 +87,7 @@ class StudentController extends Controller
             'damage_type_id'=>$damage_type,
             'damage_type_detail_id'=>$damage_type_detail,
             'notes'=>ucfirst($notes),
+            'created_at'=>now()
         ]);
 
         // Insert into damage_complaint_logs using the complaint ID
@@ -142,6 +143,7 @@ class StudentController extends Controller
             'location'=>strtoupper($location),
             'notes'=>ucfirst($notes),
             'status_id'=>1,
+            'created_at'=>now()
         ]);
 
         // Redirect to the desired route with a success message
