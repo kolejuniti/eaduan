@@ -94,7 +94,8 @@ class StudentController extends Controller
         DB::table('damage_complaint_logs')->insert([
             'damage_complaint_id' => $complaintId,
             'notes' => 'Terima aduan daripada pelajar',
-            'status_id' => 1
+            'status_id' => 1,
+            'created_at'=>now()
         ]);
 
         // Redirect to the desired route with a success message
