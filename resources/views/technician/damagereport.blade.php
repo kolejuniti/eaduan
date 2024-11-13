@@ -85,6 +85,40 @@
                     @endif
                 </table>
             </div>
+            {{-- <div class="mt-2 col-sm-3 col-md-3 col-12">
+                <table id="my2ndTable" class="table table-bordered small table-sm text-center">
+                    <caption>Jumlah aduan berdasarkan status</caption>
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 50%">Status</th>
+                            <th style="width: 50%">Jumlah Aduan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $grandTotal = 0;
+                        @endphp
+                        @foreach ($status as $stat)
+                            @php
+                                $statusTotal = 0;
+                                // Loop through all dates to calculate the total for this status
+                                foreach ($dates as $date) {
+                                    $statusTotal += $totalByStatus[$date][$stat->id]['total'] ?? 0;
+                                }
+                                $grandTotal += $statusTotal;
+                            @endphp
+                            <tr>
+                                <td>{{ $stat->name }}</td>
+                                <td>{{ $statusTotal }}</td>
+                            </tr>
+                        @endforeach
+                        <tr class="table-danger">
+                            <td><strong>Jumlah keseluruhan</strong></td>
+                            <td><strong>{{ $grandTotal }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div> --}}
         </div>
     </div>
 </div>
@@ -92,7 +126,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.1.0/b-3.1.0/b-colvis-3.1.0/b-html5-3.1.0/b-print-3.1.0/cr-2.0.3/datatables.min.js"></script>
 <script>
-
     $(document).ready(function() {
         // Initialize DataTables
         var t = $('#myTable').DataTable({

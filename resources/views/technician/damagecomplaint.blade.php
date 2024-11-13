@@ -200,7 +200,7 @@
                                 <textarea name="notes" id="notes" rows="2" class="form-control" required></textarea>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                 <button type="submit" class="btn btn-sm btn-danger">Confirm Cancel</button> <!-- Change type to submit -->
                             </div>
                         </form>
@@ -414,14 +414,14 @@
                                 $('#save-container').html(`
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-sm btn-danger open-cancel-modal" data-id="${complaintData.id}" data-bs-toggle="modal" data-bs-target="#cancelModal">Batal</button>
-                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
                                     </div>
                                 `);
                             } else {
                                 $('#save-container').html(`
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                     </div>
                                 `);
                             }
