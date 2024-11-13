@@ -53,33 +53,48 @@ class StaffController extends Controller
         $damage_type_detail = $request->input('damagetypedetails');
         $notes = $request->input('notes');
 
-        $complaintId = DB::table('damage_complaints')->insertGetId([
-            'ic'=>$staff_ic,
-            'type_of_user'=>1,
-            'date_of_complaint'=>$date_of_complaint,
-            'phone_number'=>$phone,
-            'block'=>$block,
-            'no_unit'=>$no_unit,
-            'location'=>"UNITI VILLAGE",
-            'damage_type_id'=>$damage_type,
-            'damage_type_detail_id'=>$damage_type_detail,
-            'notes'=>ucfirst($notes),
-            'created_at'=>now()
-        ]);
+        $checkComplaint = DB::table('damage_complaints')
+            ->whereDate('damage_complaints.date_of_complaint', $date_of_complaint)
+            ->where('damage_complaints.damage_type_id', '=', $damage_type)
+            ->where('damage_complaints.damage_type_detail_id', '=', $damage_type_detail)
+            ->where('damage_complaints.block', 'LIKE', "{$block}")
+            ->where('damage_complaints.no_unit', 'LIKE', "{$no_unit}")
+            ->get();
 
-        // Insert into damage_complaint_logs using the complaint ID
-        DB::table('damage_complaint_logs')->insert([
-            'damage_complaint_id' => $complaintId,
-            'notes' => 'Terima aduan daripada staf',
-            'status_id' => 1,
-            'created_at'=>now()
-        ]);
+        if ($checkComplaint->isNotEmpty()){
+                return redirect()->back()->with('danger', [
+                'Semakan mendapati aduan ini adalah aduan berulang berdasarkan tarikh, kategori, jenis kerosakan dan lokasi.',
+                'Sila ambil perhatian aduan kerosakan anda akan diselesaikan dalam tempoh masa 7 hari berkerja.'
+            ]);
+        } else {
+            $complaintId = DB::table('damage_complaints')->insertGetId([
+                'ic'=>$staff_ic,
+                'type_of_user'=>1,
+                'date_of_complaint'=>$date_of_complaint,
+                'phone_number'=>$phone,
+                'block'=>$block,
+                'no_unit'=>$no_unit,
+                'location'=>"UNITI VILLAGE",
+                'damage_type_id'=>$damage_type,
+                'damage_type_detail_id'=>$damage_type_detail,
+                'notes'=>ucfirst($notes),
+                'created_at'=>now()
+            ]);
 
-        // Redirect to the desired route with a success message
-        return redirect()->back()->with('success', [
-            'Aduan kerosakan anda telah berjaya dihantar.',
-            'Aduan kerosakan anda akan diselesaikan dalam tempoh masa 7 hari berkerja.'
-        ]);
+            // Insert into damage_complaint_logs using the complaint ID
+            DB::table('damage_complaint_logs')->insert([
+                'damage_complaint_id' => $complaintId,
+                'notes' => 'Terima aduan daripada staf',
+                'status_id' => 1,
+                'created_at'=>now()
+            ]);
+
+            // Redirect to the desired route with a success message
+            return redirect()->back()->with('success', [
+                'Aduan kerosakan anda telah berjaya dihantar.',
+                'Aduan kerosakan anda akan diselesaikan dalam tempoh masa 7 hari berkerja.'
+            ]);
+        }
     }
 
     public function showGeneralForm()
