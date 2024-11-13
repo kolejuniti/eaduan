@@ -12,6 +12,14 @@
                         @endforeach
                     </ul>
                 </div>
+            @elseif(session('danger'))
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach (session('danger') as $danger)
+                            <li>{{ $danger }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
             <div class="card">
                 <div class="card-header">{{ __('Borang Aduan Kerosakan') }}</div>
