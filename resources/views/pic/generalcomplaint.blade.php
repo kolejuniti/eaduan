@@ -281,10 +281,10 @@
                                 if (complaintData.user_id) {
                                     $('#pic-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="user" class="fw-bold">Pegawai</label>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="user">${complaintData.user_name}</label>
                                             </div>
                                         </div>
@@ -301,10 +301,10 @@
                                 if (complaintData.date_of_action) {
                                     $('#date_of_action-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="date_of_action">${complaintData.date_of_action}</label>
                                             </div>
                                         </div>
@@ -312,10 +312,10 @@
                                 } else {
                                     $('#date_of_action-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <input type="date" name="date_of_action" id="date_of_action" class="form-control form-control-sm" required>
                                             </div>
                                         </div>
@@ -329,10 +329,10 @@
                                 // Show textarea if status_id is 2
                                 $('#action_notes-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                             <label for="action_notes" class="fw-bold">Tindakan</label>
                                         </div>
-                                        <div class="col-md-10">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                             <textarea name="action_notes" id="action_notes" rows="2" class="form-control" required>${complaintData.action_notes ?? ''}</textarea>
                                         </div>
                                     </div>
@@ -342,10 +342,10 @@
                                 if (complaintData.action_notes) {
                                     $('#action_notes-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="action_notes" class="fw-bold">Tindakan</label>
                                             </div>
-                                            <div class="col-md-10">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="action_notes">${complaintData.action_notes}</label>
                                             </div>
                                         </div>
@@ -353,10 +353,10 @@
                                 } else {
                                     $('#action_notes-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="action_notes" class="fw-bold">Tindakan</label>
                                             </div>
-                                            <div class="col-md-10">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <textarea name="action_notes" id="action_notes" rows="2" class="form-control" required></textarea>
                                             </div>
                                         </div>
@@ -376,10 +376,10 @@
                                 if (complaintData.status_id !== 2) {
                                     $('#status-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="status" class="fw-bold">Status</label>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="status">${complaintData.status}</label>
                                             </div>
                                         </div>
@@ -387,10 +387,10 @@
                                 } else {
                                     $('#status-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="status" class="fw-bold">Status</label>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <select name="status" class="form-control form-control-sm" required>
                                                     <option value="" selected disabled></option>
                                                 ${statusOptions}
@@ -406,10 +406,10 @@
                             if (complaintData.cancel_notes) {
                                 $('#cancel_notes-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                        <div class="col-md-2 col-sm-2 col-2">
                                             <label for="cancel_notes" class="fw-bold">Sebab Batal</label>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-10 col-sm-10 col-10">
                                             <label for="cancel_notes">${complaintData.cancel_notes}</label>
                                         </div>
                                     </div>

@@ -326,10 +326,10 @@
                             if (complaintData.date_of_action) {
                                 $('#date_of_action-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                        <div class="col-md-2 col-sm-2 col-2">
                                             <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-10 col-sm-10 col-10">
                                             <label for="date_of_action">${complaintData.date_of_action}</label>
                                         </div>
                                     </div>
@@ -338,10 +338,10 @@
                                 $('#date_of_action-container').html(`
                                     ${(complaintData.date_of_completion === null && complaintData.latest_status_id !== 4) ? `
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                        <div class="col-md-2 col-sm-2 col-2">
                                             <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-10 col-sm-10 col-10">
                                             <input type="date" name="date_of_action" id="date_of_action" class="form-control form-control-sm" required>
                                         </div>
                                     </div>
@@ -362,20 +362,20 @@
                             if (complaintData.technician_id) {
                                 $('#technician-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                        <div class="col-md-2 col-sm-2 col-2">
                                             <label for="technician" class="fw-bold">Juruteknik</label>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-10 col-sm-10 col-10">
                                             <label for="technician">${complaintData.technician}</label>
                                         </select> 
                                         </div>
                                     </div>
                                     ${(complaintData.date_of_completion === null && complaintData.latest_status_id !== 4) ? `
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                        <div class="col-md-2 col-sm-2 col-2">
                                             <label for="status" class="fw-bold">Status</label>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-10 col-sm-10 col-10">
                                             <select name="status" class="form-control form-control-sm" required>
                                                 <option value="" selected disabled></option>
                                             ${statusOptions}
@@ -383,10 +383,10 @@
                                         </div>
                                     </div>
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                        <div class="col-md-2 col-sm-2 col-2">
                                             <label for="notes" class="fw-bold">Tindakan</label>
                                         </div>
-                                        <div class="col-md-10">
+                                        <div class="col-md-10 col-sm-10 col-10">
                                             <textarea name="notes" id="notes" rows="2" class="form-control" required></textarea>
                                         </div>
                                     </div>
@@ -396,10 +396,10 @@
                                 $('#technician-container').html(`
                                     ${(complaintData.date_of_completion === null && complaintData.latest_status_id !== 4) ? `
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                        <div class="col-md-2 col-sm-2 col-2">
                                             <label for="technician" class="fw-bold">Juruteknik</label>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-10 col-sm-10 col-10">
                                             <select name="technician" class="form-control form-control-sm" required>
                                                 <option value="" selected disabled></option>
                                             ${technicianOptions}
