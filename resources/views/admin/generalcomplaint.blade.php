@@ -312,7 +312,7 @@
                                             <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="user" class="fw-bold">Tindakan Oleh</label>
                                             </div>
-                                            <div class="col-md-4 col-sm-4 col-10">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="user">${complaintData.user_name}</label>
                                             </div>
                                         </div>
