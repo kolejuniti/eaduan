@@ -346,7 +346,7 @@
                                             <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="section" class="fw-bold">Bahagian / Unit</label>
                                             </div>
-                                            <div class="col-md-4 col-sm-4 col-4">
+                                            <div class="col-md-6 col-sm-6 col-6">
                                                 <select name="section" class="form-control form-control-sm" required>
                                                     <option value="" selected disabled></option>
                                                     ${sectionOptions}
