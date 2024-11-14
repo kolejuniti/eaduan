@@ -341,7 +341,7 @@
                                         <div class="col-md-2 col-sm-2 col-2">
                                             <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-5 col-sm-5 col-5">
                                             <input type="date" name="date_of_action" id="date_of_action" class="form-control form-control-sm" required>
                                         </div>
                                     </div>
@@ -375,7 +375,7 @@
                                         <div class="col-md-2 col-sm-2 col-2">
                                             <label for="status" class="fw-bold">Status</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-5 col-sm-5 col-5">
                                             <select name="status" class="form-control form-control-sm" required>
                                                 <option value="" selected disabled></option>
                                             ${statusOptions}
