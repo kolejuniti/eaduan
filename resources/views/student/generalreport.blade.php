@@ -32,7 +32,7 @@
                             <td style="width: 10%;">{{ $generalList->date_of_action }}</td>
                             <td style="width: 20%;">{{ $generalList->action_notes }}</td>
                             <td style="width: 1%;">{{ $generalList->status }}</td>
-                            <td style="width: 20%;">{{ $data->cancel_notes }}</td>
+                            <td style="width: 20%;">{{ $generalList->cancel_notes }}</td>
                         </tr>
                         @endforeach
                     </tbody>
