@@ -290,7 +290,7 @@
                                             <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="date_of_receipt" class="fw-bold">Tarikh Terima</label>
                                             </div>
-                                            <div class="col-md-10 col-sm-10 col-10">
+                                            <div class="col-md-4 col-sm-4 col-4">
                                                 <input type="date" name="date_of_receipt" id="date_of_receipt" class="form-control form-control-sm" required>
                                             </div>
                                         </div>
@@ -346,7 +346,7 @@
                                             <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="section" class="fw-bold">Bahagian / Unit</label>
                                             </div>
-                                            <div class="col-md-10 col-sm-10 col-10">
+                                            <div class="col-md-4 col-sm-4 col-4">
                                                 <select name="section" class="form-control form-control-sm" required>
                                                     <option value="" selected disabled></option>
                                                     ${sectionOptions}
