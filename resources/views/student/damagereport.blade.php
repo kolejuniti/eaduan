@@ -17,6 +17,7 @@
                             <th>Tarikh Tindakan</th>
                             <th>Tarikh Selesai</th>
                             <th>Status</th>
+                            <th>Sebab Batal</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,6 +32,7 @@
                             <td>{{ $data->date_of_action }}</td>
                             <td>{{ $data->date_of_completion }}</td>
                             <td>{{ $data->status }}</td>
+                            <td>{{ $data->cancel_notes }}</td>
                         </tr>
                         @endforeach
                     </tbody>
