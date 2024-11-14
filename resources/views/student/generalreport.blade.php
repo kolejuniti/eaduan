@@ -30,8 +30,8 @@
                             <td style="width: 10%;">{{ $generalList->complaint_types }}</td>
                             <td style="width: 10%;">{{ $generalList->date_of_receipt }}</td>
                             <td style="width: 10%;">{{ $generalList->date_of_action }}</td>
-                            <td style="width: 30%;">{{ $generalList->action_notes }}</td>
-                            <td style="width: 10%;">{{ $generalList->status }}</td>
+                            <td style="width: 20%;">{{ $generalList->action_notes }}</td>
+                            <td style="width: 20%;">{{ $generalList->status }}</td>
                             <td>{{ $generalList->cancel_notes }}</td>
                         </tr>
                         @endforeach
