@@ -241,7 +241,7 @@ class StaffController extends Controller
                 'sections.name AS section', 'complaint_types.name AS complaint_types',
                 DB::raw("DATE_FORMAT(general_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
                 DB::raw("DATE_FORMAT(general_complaints.date_of_receipt, '%d-%m-%Y') as date_of_receipt"),
-                'general_complaints.action_notes AS action_notes', 'status.name AS status'
+                'general_complaints.action_notes AS action_notes', 'status.name AS status', 'general_complaints.cancel_notes AS cancel_notes'
                 )
             ->get();
 

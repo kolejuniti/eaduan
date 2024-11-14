@@ -18,6 +18,7 @@
                             <th>Tarikh Tindakan</th>
                             <th>Tindakan</th>
                             <th>Status</th>
+                            <th>Sebab Batal</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,8 +30,9 @@
                             <td style="width: 10%;">{{ $generalList->complaint_types }}</td>
                             <td style="width: 10%;">{{ $generalList->date_of_receipt }}</td>
                             <td style="width: 10%;">{{ $generalList->date_of_action }}</td>
-                            <td style="width: 30%;">{{ $generalList->action_notes }}</td>
-                            <td style="width: 10%;">{{ $generalList->status }}</td>
+                            <td style="width: 20%;">{{ $generalList->action_notes }}</td>
+                            <td style="width: 1%;">{{ $generalList->status }}</td>
+                            <td style="width: 20%;">{{ $generalList->cancel_notes }}</td>
                         </tr>
                         @endforeach
                     </tbody>
