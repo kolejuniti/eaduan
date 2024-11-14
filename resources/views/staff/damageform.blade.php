@@ -70,6 +70,7 @@
                             <input type="hidden" name="location" id="location_id" value="UNITI VILLAGE">                           
                             <label for="no_unit">Lokasi</label>
                         </div>
+                        <label for="" class="col-sm-12 col-md-12 col-12"><em>*Sila nyatakan lokasi dibahagian catatan sekiranya perlu bagi memudahkan juruteknik yang akan ditugaskan.</em></label>
                     </div>
                     <div class="col-md-12 col-sm-12 mb-2">
                         <label for="" class="fw-bold">Maklumat Kerosakan</label>
