@@ -399,7 +399,7 @@
                                         <div class="col-md-2 col-sm-2 col-2">
                                             <label for="technician" class="fw-bold">Juruteknik</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-5 col-sm-5 col-5">
                                             <select name="technician" class="form-control form-control-sm" required>
                                                 <option value="" selected disabled></option>
                                             ${technicianOptions}
