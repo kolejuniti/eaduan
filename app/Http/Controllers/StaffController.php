@@ -171,6 +171,7 @@ class StaffController extends Controller
                 'damage_type_details.name AS damage_type_details',
                 'latest_log.latest_status AS status' // Latest status from the subquery
             )
+            ->orderBy('damage_complaints.created_at', 'DESC')
             ->get();
 
         return view('staff.damagereport', compact('damageLists'));
