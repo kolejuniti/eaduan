@@ -276,10 +276,10 @@
                                 if (complaintData.date_of_receipt) {
                                     $('#date_of_receipt-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2 col-sm-2 col-6">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="date_of_receipt" class="fw-bold">Tarikh Terima</label>
                                             </div>
-                                            <div class="col-md-4 col-sm-4 col-6">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="date_of_receipt">${complaintData.date_of_receipt}</label>
                                             </div>
                                         </div>
@@ -287,10 +287,10 @@
                                 } else {
                                     $('#date_of_receipt-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2 col-sm-2 col-6">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="date_of_receipt" class="fw-bold">Tarikh Terima</label>
                                             </div>
-                                            <div class="col-md-4 col-sm-4 col-6">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <input type="date" name="date_of_receipt" id="date_of_receipt" class="form-control form-control-sm" required>
                                             </div>
                                         </div>
@@ -332,10 +332,10 @@
                                 if (complaintData.section_id) {
                                     $('#section-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2 col-sm-2 col-6">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="section" class="fw-bold">Bahagian / Unit</label>
                                             </div>
-                                            <div class="col-md-6 col-sm-6 col-6">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="section">${complaintData.section}</label>
                                             </div>
                                         </div>
@@ -343,10 +343,10 @@
                                 } else {
                                     $('#section-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2 col-sm-2 col-6">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="section" class="fw-bold">Bahagian / Unit</label>
                                             </div>
-                                            <div class="col-md-6 col-sm-6 col-6">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <select name="section" class="form-control form-control-sm" required>
                                                     <option value="" selected disabled></option>
                                                     ${sectionOptions}
@@ -364,10 +364,10 @@
                                 if (complaintData.date_of_action) {
                                     $('#date_of_action-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="date_of_action">${complaintData.date_of_action}</label>
                                             </div>
                                         </div>
@@ -383,10 +383,10 @@
                                 if (complaintData.action_notes) {
                                     $('#action_notes-container').html(`
                                         <div class="row mb-1">
-                                            <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                                 <label for="action_notes" class="fw-bold">Tindakan</label>
                                             </div>
-                                            <div class="col-md-10">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                                 <label for="action_notes">${complaintData.action_notes}</label>
                                             </div>
                                         </div>
@@ -401,10 +401,10 @@
                             if (complaintData.cancel_notes) {
                                 $('#cancel_notes-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2">
+                                            <div class="col-md-2 col-sm-2 col-2">
                                             <label for="cancel_notes" class="fw-bold">Sebab Batal</label>
                                         </div>
-                                        <div class="col-md-4">
+                                            <div class="col-md-10 col-sm-10 col-10">
                                             <label for="cancel_notes">${complaintData.cancel_notes}</label>
                                         </div>
                                     </div>
