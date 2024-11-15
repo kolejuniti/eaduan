@@ -106,18 +106,18 @@
                             </div>
                             <div class="modal-body small">
                                 <div class="row mb-1">
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 col-sm-2 col-4">
                                         <label for="complaint-complainant_name" class="fw-bold">Nama</label>
                                     </div>
-                                    <div class="col-md-10">
+                                    <div class="col-md-10 col-sm-10 col-8">
                                         <label id="complaint-complainant_name"></label>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 col-sm-2 col-4">
                                         <label for="complaint-phone_number" class="fw-bold">No. Telefon</label>
                                     </div>
-                                    <div class="col-md-10">
+                                    <div class="col-md-10 col-sm-10 col-8">
                                         <label id="complaint-phone_number"></label>
                                     </div>
                                 </div>
