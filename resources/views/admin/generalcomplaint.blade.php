@@ -120,6 +120,7 @@
                                         <tr>
                                             <th>Tarikh & Masa</th>
                                             <th>Jenis Aduan</th>
+                                            <th>Lokasi</th>
                                             <th>Catatan</th>
                                             <th>Status</th>
                                         </tr>
@@ -128,6 +129,7 @@
                                         <tr>
                                             <td style="width: 20%;"><label id="complaint-date_of_complaint"></label></td>
                                             <td style="width: 15%;"><label id="complaint-complaint_type"></label></td>
+                                            <td style="width: 5%;"><label id="complaint-location"></label></td>
                                             <td><label id="complaint-notes"></label></td>
                                             <td style="width: 15%;"><label id="complaint-status"></label></td>
                                         </tr>
@@ -268,6 +270,7 @@
                             $('#complaint-phone_number').text(complaintData.phone_number);
                             $('#complaint-date_of_complaint').text(complaintData.date_of_complaint);
                             $('#complaint-complaint_type').text(complaintData.complaint_type);
+                            $('#complaint-location').text(complaintData.location);
                             $('#complaint-notes').html(complaintData.notes.replace(/\n/g, '<br>'));
                             $('#complaint-status').text(complaintData.status);
 
