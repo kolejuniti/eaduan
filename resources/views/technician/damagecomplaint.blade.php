@@ -106,18 +106,18 @@
                             </div>
                             <div class="modal-body small">
                                 <div class="row mb-1">
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 col-sm-2 col-4">
                                         <label for="complaint-complainant_name" class="fw-bold">Nama</label>
                                     </div>
-                                    <div class="col-md-10">
+                                    <div class="col-md-10 col-sm-10 col-8">
                                         <label id="complaint-complainant_name"></label>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 col-sm-2 col-4">
                                         <label for="complaint-phone_number" class="fw-bold">No. Telefon</label>
                                     </div>
-                                    <div class="col-md-10">
+                                    <div class="col-md-10 col-sm-10 col-8">
                                         <label id="complaint-phone_number"></label>
                                     </div>
                                 </div>
@@ -145,10 +145,10 @@
                                     </tbody>
                                 </table>
                                 <div class="row mb-3">
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 col-sm-2 col-4">
                                         <label for="complaint-notes" class="fw-bold">Catatan</label>
                                     </div>
-                                    <div class="col-md-10">
+                                    <div class="col-md-10 col-sm-10 col-8">
                                         <label id="complaint-notes"></label>
                                     </div>
                                 </div>
@@ -326,10 +326,10 @@
                             if (complaintData.date_of_action) {
                                 $('#date_of_action-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-10 col-sm-10 col-8">
                                             <label for="date_of_action">${complaintData.date_of_action}</label>
                                         </div>
                                     </div>
@@ -338,7 +338,7 @@
                                 $('#date_of_action-container').html(`
                                     ${(complaintData.date_of_completion === null && complaintData.latest_status_id !== 4) ? `
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                         </div>
                                         <div class="col-md-5 col-sm-5 col-5">
@@ -362,17 +362,17 @@
                             if (complaintData.technician_id) {
                                 $('#technician-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="technician" class="fw-bold">Juruteknik</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-10 col-sm-10 col-8">
                                             <label for="technician">${complaintData.technician}</label>
                                         </select> 
                                         </div>
                                     </div>
                                     ${(complaintData.date_of_completion === null && complaintData.latest_status_id !== 4) ? `
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="status" class="fw-bold">Status</label>
                                         </div>
                                         <div class="col-md-5 col-sm-5 col-5">
@@ -383,10 +383,10 @@
                                         </div>
                                     </div>
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="notes" class="fw-bold">Tindakan</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-10 col-sm-10 col-8">
                                             <textarea name="notes" id="notes" rows="2" class="form-control" required></textarea>
                                         </div>
                                     </div>
@@ -396,7 +396,7 @@
                                 $('#technician-container').html(`
                                     ${(complaintData.date_of_completion === null && complaintData.latest_status_id !== 4) ? `
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="technician" class="fw-bold">Juruteknik</label>
                                         </div>
                                         <div class="col-md-5 col-sm-5 col-5">
