@@ -57,7 +57,7 @@
                             <td class="text-center">{{ $data->phone_number }}</td>
                             <td>{{ $data->section }}</td>
                             <td>{{ $data->complaint_type }}</td>
-                            <td></td>
+                            <td>{{ $data->location }}</td>
                             <td>{{ $data->date_of_receipt }}</td>
                             <td>{{ $data->date_of_action }}</td>
                             <td>{{ $data->status }}</td>
