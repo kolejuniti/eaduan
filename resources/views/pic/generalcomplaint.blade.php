@@ -103,6 +103,7 @@
                                             <th>Tarikh & Masa</th>
                                             <th>Bahagian / Unit</th>
                                             <th>Jenis Aduan</th>
+                                            <th>Lokasi</th>
                                             <th>Catatan</th>
                                             <th>Status</th>
                                         </tr>
@@ -112,6 +113,7 @@
                                             <td><label id="complaint-date_of_complaint"></label></td>
                                             <td><label id="complaint-section"></label></td>
                                             <td><label id="complaint-complaint_type"></label></td>
+                                            <td><label id="complaint-location"></label></td>
                                             <td><label id="complaint-notes"></label></td>
                                             <td><label id="complaint-status"></label></td>
                                         </tr>
@@ -253,6 +255,7 @@
                             $('#complaint-date_of_complaint').text(complaintData.date_of_complaint);
                             $('#complaint-section').text(complaintData.section);
                             $('#complaint-complaint_type').text(complaintData.complaint_type);
+                            $('#complaint-location').text(complaintData.location);
                             $('#complaint-notes').html(complaintData.notes.replace(/\n/g, '<br>'));
                             $('#complaint-status').text(complaintData.status);
 
