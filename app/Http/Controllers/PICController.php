@@ -34,7 +34,8 @@ class PICController extends Controller
                 'status.name AS status',
                 'general_complaints.status_id AS status_id',
                 'general_complaints.created_at',
-                'general_complaints.user_id'
+                'general_complaints.user_id',
+                'general_complaints.location',
             )->where('general_complaints.section_id', $pic->section_id)
             ->union(
                 DB::table('general_complaints')
@@ -54,7 +55,8 @@ class PICController extends Controller
                         'status.name AS status',
                         'general_complaints.status_id AS status_id',
                         'general_complaints.created_at',
-                        'general_complaints.user_id'
+                        'general_complaints.user_id',
+                        'general_complaints.location',
                     )->where('general_complaints.section_id', $pic->section_id)
             )
             ->orderBy('created_at', 'DESC') // Order by the field in the combined result
@@ -87,6 +89,7 @@ class PICController extends Controller
                 'general_complaints.user_id AS user_id',
                 'general_complaints.status_id AS status_id',
                 'general_complaints.cancel_notes AS cancel_notes',
+                'general_complaints.location AS location',
                 'eaduan.users.name AS user_name'
             )
             ->where('general_complaints.id', '=', $id) // Filter by the complaint ID
@@ -111,6 +114,7 @@ class PICController extends Controller
                         'general_complaints.user_id AS user_id',
                         'general_complaints.status_id AS status_id',
                         'general_complaints.cancel_notes AS cancel_notes',
+                        'general_complaints.location AS location',
                         'eaduan.users.name AS user_name'
                     )
                     ->where('general_complaints.id', '=', $id) // Filter by the complaint ID
