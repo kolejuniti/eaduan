@@ -145,10 +145,10 @@
                                     </tbody>
                                 </table>
                                 <div class="row mb-3">
-                                    <div class="col-md-2">
+                                    <div class="col-md-2 col-sm-2 col-4">
                                         <label for="complaint-notes" class="fw-bold">Catatan</label>
                                     </div>
-                                    <div class="col-md-10">
+                                    <div class="col-md-10 col-sm-10 col-8">
                                         <label id="complaint-notes"></label>
                                     </div>
                                 </div>
