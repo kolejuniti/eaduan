@@ -329,10 +329,10 @@
                             if (complaintData.date_of_action) {
                                 $('#date_of_action-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-10 col-sm-10 col-8">
                                             <label for="date_of_action">${complaintData.date_of_action}</label>
                                         </div>
                                     </div>
@@ -340,10 +340,10 @@
                             } else {
                                 $('#date_of_action-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-10 col-sm-10 col-8">
                                             <label for="date_of_action" class="fw-bold">-</label>
                                         </div>
                                     </div>
@@ -363,10 +363,10 @@
                             if (complaintData.technician_id) {
                                 $('#technician-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="technician" class="fw-bold">Juruteknik</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-10 col-sm-10 col-8">
                                             <label for="technician">${complaintData.technician}</label>
                                         </select> 
                                         </div>
@@ -375,10 +375,10 @@
                             } else {
                                 $('#technician-container').html(`
                                     <div class="row mb-1">
-                                        <div class="col-md-2 col-sm-2 col-2">
+                                        <div class="col-md-2 col-sm-2 col-4">
                                             <label for="technician" class="fw-bold">Juruteknik</label>
                                         </div>
-                                        <div class="col-md-10 col-sm-10 col-10">
+                                        <div class="col-md-10 col-sm-10 col-8">
                                             <label for="technician" class="fw-bold">-</label>
                                         </select> 
                                         </div>
