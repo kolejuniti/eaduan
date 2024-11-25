@@ -21,7 +21,11 @@
             </thead>
             <tbody>
                 @foreach ($complaintLists[$statusType->id] as $item)
+                @if ( $statusType->id === 1)
                 <tr class="table-info">
+                @else
+                <tr class="table-warning">
+                @endif
                     <td style="width: 1%;"></td>
                     <td style="width: 15%;">{{ $item->date_of_complaint }}</td>
                     <td style="width: 10%;">{{ $item->damage_type }}</td>
