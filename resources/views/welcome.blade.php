@@ -23,13 +23,13 @@
         }
     </style>
     
-    <!-- Preconnect to Font Provider -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    
-    <!-- Preload Fonts and Load Asynchronously -->
-    <link rel="preload" href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" as="style" onload="this.rel='stylesheet'">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" as="style" onload="this.rel='stylesheet'">
     <noscript>
-        <link rel="stylesheet" href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap">
     </noscript>
 
     <!-- Scripts -->
