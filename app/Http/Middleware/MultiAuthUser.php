@@ -27,7 +27,7 @@ class MultiAuthUser
                     return redirect('/technician/dashboard');
                 case 'admin':
                     return redirect('/admin/dashboard');
-                case 'admin':
+                case 'pic':
                     return redirect('/pic/dashboard');
             }
         }
