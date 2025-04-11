@@ -13,6 +13,9 @@
                     </ul>
                 </div>
             @endif
+            <div class="alert alert-info">
+                <strong>Perhatian:</strong> Borang ini adalah untuk aduan umum sahaja. Sekiranya ingin melaporkan sebarang kerosakan, sila gunakan <a href="{{ route('student.damageform') }}" class="alert-link">Borang Aduan Kerosakan</a>.
+            </div>
             <div class="card">
                 <div class="card-header">{{ __('Borang Aduan Umum') }}</div>
                 <form method="POST" action="{{ route('student.generalform.submit') }}" class="needs-validation" novalidate>
