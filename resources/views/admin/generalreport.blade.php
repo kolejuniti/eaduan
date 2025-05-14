@@ -176,16 +176,7 @@
                         },
                         {
                             extend: 'pdfHtml5',
-                            title: 'Statistik Aduan Umum Mengikut Kategori & Status',
-                            customize: function (doc) {
-                                doc.pageOrientation = 'landscape';
-                                doc.pageMargins = [20, 20, 20, 20];
-                                doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
-                                doc.styles.title = {
-                                    alignment: 'center',
-                                    fontSize: 14
-                                };
-                            }
+                            title: 'Statistik Aduan Umum Mengikut Kategori & Status'
                         },
                         {
                             extend: 'print',
