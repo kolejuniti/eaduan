@@ -177,8 +177,9 @@
                         {
                             extend: 'pdfHtml5',
                             title: 'Statistik Aduan Umum Mengikut Kategori & Status',
-                            orientation: 'landscape', // <-- set orientation here
-                            pageSize: 'A4' // optional: default is A4
+                            customize: function (doc) {
+                                doc.pageOrientation = 'landscape';
+                            }
                         },
                         {
                             extend: 'print',
