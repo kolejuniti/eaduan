@@ -25,8 +25,8 @@ Route::get('/', function () {
     }
 
     // Check for general user authentication and redirect based on user type
-    if (auth()->check()) {
-        switch (auth()->user()->type) {
+    if (Auth::check()) {
+        switch (Auth::user()->type) {
             case 'technician':
                 return redirect('/technician/dashboard');
             case 'admin':
