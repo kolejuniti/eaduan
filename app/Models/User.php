@@ -52,7 +52,9 @@ class User extends Authenticatable
     protected function type(): Attribute
     {
         return new Attribute(
-            get: fn ($value) =>  ["technician", "admin", "pic"][$value],
+            get: fn ($value) => ["technician", "admin", "pic"][$value] ?? null,
+
+            set: fn ($value) => array_search($value, ["technician", "admin", "pic"])
         );
     }
 }
