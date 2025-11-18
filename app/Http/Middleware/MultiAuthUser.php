@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 class MultiAuthUser
 {
@@ -16,13 +17,13 @@ class MultiAuthUser
     public function handle(Request $request, Closure $next, $userType): Response
     {
 
-        if (auth()->check()) {
-            if (auth()->user()->type == $userType) {
+        if (Auth::check()) {
+            if (Auth::user()->type == $userType) {
                 return $next($request);
             }
             
             // Redirect based on user type
-            switch (auth()->user()->type) {
+            switch (Auth::user()->type) {
                 case 'technician':
                     return redirect('/technician/dashboard');
                 case 'admin':
@@ -32,6 +33,6 @@ class MultiAuthUser
             }
         }
 
-        return response()->json(['You are not authorized to access this page.']);
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
 }
