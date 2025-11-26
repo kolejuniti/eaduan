@@ -46,9 +46,9 @@ class AdminController extends Controller
             'name' => strtoupper($validatedData['name']),
             'email' => $validatedData['email'],
             'password' => Hash::make('12345678'),  // Consider using random password generation or user-defined
-            'type' => ('2'),  // Assuming type 2 is predefined as "pic"
+            'type' => 2,  // Type 2 = pic (must be integer, not string, due to User model accessor)
             'section_id' => $section,
-            'status' => ('1'),  // Assuming status 1 is predefined as "active"
+            'status' => 1,  // Status 1 = active
         ]);
 
         // Redirect with success message
