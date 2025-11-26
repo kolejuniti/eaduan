@@ -128,7 +128,7 @@
                                 <p class="mb-1" style="font-size: 0.95rem;">Sistem Pengurusan Aduan Atas Talian</p>
                                 <p class="mb-0" style="font-size: 0.85rem; opacity: 0.9;">
                                     <i class="bi bi-clock-fill"></i> Akses 24/7 | 
-                                    <i class="bi bi-check-circle-fill"></i> Diselesaikan dalam masa 5 hari
+                                    <i class="bi bi-check-circle-fill"></i> Diselesaikan dalam tempoh 7 hari
                                 </p>
                             </div>
                         </div>
