@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -372,26 +373,78 @@ class AdminController extends Controller
         //fetch section
         $sections = DB::table('sections')->get();
 
+        //fetch status data
+        $status = DB::table('status')->whereIn('id', [2,3])->get();
+
         if ($request->ajax()) {
-            return response()->json(['complaintLists' => $complaintLists, 'users' => $users, 'sections' => $sections]);
+            return response()->json(['complaintLists' => $complaintLists, 'users' => $users, 'sections' => $sections, 'status' => $status]);
         }
 
-        return view('admin.generalcomplaint', compact('complaintLists', 'users', 'sections'));
+        return view('admin.generalcomplaint', compact('complaintLists', 'users', 'sections', 'status'));
     }
 
     public function complaintUpdate(Request $request, $id) 
     {
-        $date_of_receipt = $request->input('date_of_receipt');
-        $user = $request->input('user');
-        $section = $request->input('section');
 
-        DB::table('general_complaints')
-                ->where('general_complaints.id', $id)
-                ->update([
-                    'date_of_receipt' => $date_of_receipt, 
-                    'section_id' => $section,
-                    'status_id' => 2
-                ]);
+        $complaint = DB::table('general_complaints')
+            ->where('id', $id)
+            ->select('status_id', 'date_of_action')
+            ->first();
+
+        if (!$complaint) {
+            return redirect()->route('admin.generalcomplaint')->with('error', 'Aduan tidak dijumpai.');
+        }
+
+        $currentStatusId = $complaint->status_id;
+        $currentDateOfAction = $complaint->date_of_action;
+
+        $updateData = [];
+        $pic = Auth::user();
+
+        if ($currentStatusId == 1) {
+            // Update receipt info
+            $updateData = [
+                'date_of_receipt' => $request->input('date_of_receipt'),
+                'section_id'      => $request->input('section'),
+                'user_id'         => $request->input('user'),
+                'status_id'       => 2,
+            ];
+        } elseif ($currentStatusId == 2) {
+            $date_of_action_request = $request->input('date_of_action');
+            $action_notes = $request->input('action_notes');
+            $status_request = $request->input('status');
+
+            if (is_null($currentDateOfAction) && !is_null($date_of_action_request)) {
+                // Update action info for the first time
+                $updateData = [
+                    'date_of_action' => $date_of_action_request,
+                    'user_id'        => $pic->id,
+                    'action_notes'   => ucfirst($action_notes),
+                    'status_id'      => $status_request,
+                ];
+            } else {
+                // Update status and action notes for an already acted-upon complaint
+                $updateData = [
+                    'action_notes'   => ucfirst($action_notes),
+                    'status_id'      => $status_request,
+                ];
+                // If date_of_action is provided in the request, and it's different, update it.
+                // This handles cases where the date of action might be corrected.
+                if (!is_null($date_of_action_request) && $date_of_action_request !== $currentDateOfAction) {
+                    $updateData['date_of_action'] = $date_of_action_request;
+                }
+            }
+        } else {
+            // Handle other statuses if necessary, or do nothing
+            return redirect()->route('admin.generalcomplaint')->with('info', 'Aduan tidak memerlukan kemaskini pada status ini.');
+        }
+
+        if (!empty($updateData)) {
+            DB::table('general_complaints')
+                ->where('id', $id)
+                ->update($updateData);
+        }
+
 
         return redirect()->route('admin.generalcomplaint')->with('success', 'Aduan telah dikemaskini dan diserahkan kepada bahagian / unit yang terlibat.');
     }

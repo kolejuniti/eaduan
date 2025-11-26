@@ -141,9 +141,9 @@ class PICController extends Controller
 
         // Get the existing date_of_action from the database
         $existingComplaint = DB::table('general_complaints')
-                           ->select('date_of_action')
-                           ->where('id', $id)
-                           ->first();
+                        ->select('date_of_action')
+                        ->where('id', $id)
+                        ->first();
 
         // Prepare the data to update
         $updateData = [
