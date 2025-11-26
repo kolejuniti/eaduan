@@ -11,63 +11,68 @@ class TechnicianController extends Controller
 {
     public function dashboard()
     {
-
         $statusTypes = DB::table('status')->whereIn('id', [1, 2])->get(['id', 'name']);
         
         $complaintLists = [];
 
+        // Pre-compute the latest log ID for each complaint using GROUP BY
+        // This is much more efficient than correlated subqueries
+        $latestLogIds = DB::table('damage_complaint_logs')
+            ->select('damage_complaint_id', DB::raw('MAX(id) as max_log_id'))
+            ->groupBy('damage_complaint_id');
+
+        // Join with the actual log data to get the status
+        $latestStatusSubquery = DB::table('damage_complaint_logs as dcl')
+            ->joinSub($latestLogIds, 'latest', function($join) {
+                $join->on('dcl.damage_complaint_id', '=', 'latest.damage_complaint_id')
+                     ->on('dcl.id', '=', 'latest.max_log_id');
+            })
+            ->whereIn('dcl.status_id', [1, 2])
+            ->select('dcl.damage_complaint_id', 'dcl.status_id as latest_status_id');
+
         foreach ($statusTypes as $statusType) {
-            //Query for new complaint
+            // Query for students
             $firstQuery = DB::table('damage_complaints')
                 ->join('eduhub.students', 'damage_complaints.ic', '=', 'eduhub.students.ic')
                 ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
-                ->join(DB::raw('(SELECT damage_complaint_logs.damage_complaint_id, status.id AS latest_status_id 
-                                    FROM damage_complaint_logs
-                                    JOIN status ON damage_complaint_logs.status_id = status.id
-                                    WHERE damage_complaint_logs.id = 
-                                    (SELECT MAX(id) FROM damage_complaint_logs AS logs 
-                                    WHERE logs.damage_complaint_id = damage_complaint_logs.damage_complaint_id)
-                                    AND status.id = ?
-                                    ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
+                ->joinSub($latestStatusSubquery, 'latest_log', function($join) use ($statusType) {
+                    $join->on('damage_complaints.id', '=', 'latest_log.damage_complaint_id')
+                         ->where('latest_log.latest_status_id', '=', $statusType->id);
+                })
                 ->where('eduhub.students.status', '2')
                 ->select(
-                        'damage_complaints.id',
-                        'eduhub.students.name AS complainant_name',
-                        'damage_complaints.phone_number',
-                        'damage_types.name AS damage_type',
-                        'damage_complaints.block',
-                        'damage_complaints.no_unit',
-                        'damage_complaints.created_at',
-                        DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
-                        'latest_log.latest_status_id'
-                )
-                ->setBindings([$statusType->id], 'join');
+                    'damage_complaints.id',
+                    'eduhub.students.name AS complainant_name',
+                    'damage_complaints.phone_number',
+                    'damage_types.name AS damage_type',
+                    'damage_complaints.block',
+                    'damage_complaints.no_unit',
+                    'damage_complaints.created_at',
+                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                    'latest_log.latest_status_id'
+                );
 
+            // Query for users (staff)
             $secondQuery = DB::table('damage_complaints')
                 ->join('eduhub.users', 'damage_complaints.ic', '=', 'eduhub.users.ic')
                 ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
-                ->join(DB::raw('(SELECT damage_complaint_logs.damage_complaint_id, status.id AS latest_status_id 
-                                    FROM damage_complaint_logs
-                                    JOIN status ON damage_complaint_logs.status_id = status.id
-                                    WHERE damage_complaint_logs.id = 
-                                    (SELECT MAX(id) FROM damage_complaint_logs AS logs 
-                                    WHERE logs.damage_complaint_id = damage_complaint_logs.damage_complaint_id)
-                                    AND status.id = ?
-                                    ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
+                ->joinSub($latestStatusSubquery, 'latest_log', function($join) use ($statusType) {
+                    $join->on('damage_complaints.id', '=', 'latest_log.damage_complaint_id')
+                         ->where('latest_log.latest_status_id', '=', $statusType->id);
+                })
                 ->select(
-                        'damage_complaints.id',
-                        'eduhub.users.name AS complainant_name',
-                        'damage_complaints.phone_number',
-                        'damage_types.name AS damage_type',
-                        'damage_complaints.block',
-                        'damage_complaints.no_unit',
-                        'damage_complaints.created_at',
-                        DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
-                        'latest_log.latest_status_id'
-                )
-                ->setBindings([$statusType->id], 'join');
+                    'damage_complaints.id',
+                    'eduhub.users.name AS complainant_name',
+                    'damage_complaints.phone_number',
+                    'damage_types.name AS damage_type',
+                    'damage_complaints.block',
+                    'damage_complaints.no_unit',
+                    'damage_complaints.created_at',
+                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                    'latest_log.latest_status_id'
+                );
 
-                $complaintLists[$statusType->id] = $firstQuery->union($secondQuery)
+            $complaintLists[$statusType->id] = $firstQuery->union($secondQuery)
                 ->orderBy('created_at', 'DESC')
                 ->limit(5)
                 ->get(); 
