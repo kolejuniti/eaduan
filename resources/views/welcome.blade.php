@@ -125,7 +125,7 @@
                         <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                             <div class="card-body text-white text-center py-4">
                                 <h1 class="mb-2" style="font-size: 1.75rem; font-weight: 600;">e-Aduan</h1>
-                                <p class="mb-1" style="font-size: 0.95rem;">Sistem Pengurusan Aduan Dalam Talian Kolej UNITI</p>
+                                <p class="mb-1" style="font-size: 0.95rem;">Sistem Pengurusan Aduan Atas Talian</p>
                                 <p class="mb-0" style="font-size: 0.85rem; opacity: 0.9;">
                                     <i class="bi bi-clock-fill"></i> Akses 24/7 | 
                                     <i class="bi bi-check-circle-fill"></i> Diselesaikan dalam masa 5 hari
