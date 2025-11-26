@@ -147,7 +147,7 @@
                                     </div>
                                     <h5 class="mb-0" style="font-size: 1.1rem; font-weight: 600; color: #2d3748;">Aduan Kerosakan</h5>
                                 </div>
-                                <p class="mb-2" style="font-size: 0.85rem; color: #4a5568;">Laporkan aduan berkaitan kerosakan berkaitan asrama atau infrastruktur:</p>
+                                <p class="mb-2" style="font-size: 0.85rem; color: #4a5568;">Laporkan aduan kerosakan berkaitan asrama atau infrastruktur:</p>
                                 <ul style="font-size: 0.8rem; color: #718096; margin-bottom: 0;">
                                     <li>Perabot atau peralatan rosak</li>
                                     <li>Masalah penyelenggaraan kemudahan</li>
