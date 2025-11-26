@@ -146,7 +146,10 @@
                                 </div>
                                 <div id="date_of_action-container">
                                     <!-- date_of_action will be loaded here -->
-                                </div> 
+                                </div>
+                                <div id="status-container">
+                                    <!-- status will be loaded here -->
+                                </div>  
                                 <div id="action_notes-container">
                                     <!-- action_notes will be loaded here -->
                                 </div>  
@@ -375,14 +378,72 @@
                                             </div>
                                         </div>
                                     `);
-                                } else {
-                                    $('#date_of_action-container').html('');
+                                } else if (complaintData.status_id === 2) {
+                                    $('#date_of_action-container').html(`
+                                        <div class="row mb-1">
+                                            <div class="col-md-2 col-sm-2 col-4">
+                                                <label for="date_of_action" class="fw-bold">Tarikh Tindakan</label>
+                                            </div>
+                                            <div class="col-md-10 col-sm-10 col-5">
+                                                <input type="date" name="date_of_action" id="date_of_action" class="form-control form-control-sm" required>
+                                            </div>
+                                        </div>
+                                    `);
                                 }
                             } else {
                                 $('#date_of_action-container').html(''); // Clear the container if status_id === 4
                             }
 
-                            if (complaintData.status_id !== 4) {
+                            // Handle status
+                            let statusOptions = response.status.map((status) => 
+                                `<option value="${status.id}">${status.name}</option>`
+                            ).join('');
+
+                            if (complaintData.status_id !== 4 && complaintData.status_id === 2) {
+                                if (complaintData.status_id !== 2) {
+                                    $('#status-container').html(`
+                                        <div class="row mb-1">
+                                            <div class="col-md-2 col-sm-2 col-4">
+                                                <label for="status" class="fw-bold">Status</label>
+                                            </div>
+                                            <div class="col-md-10 col-sm-10 col-8">
+                                                <label for="status">${complaintData.status}</label>
+                                            </div>
+                                        </div>
+                                    `);
+                                } else if (complaintData.status_id === 2) {
+                                    $('#status-container').html(`
+                                        <div class="row mb-1">
+                                            <div class="col-md-2 col-sm-2 col-4">
+                                                <label for="status" class="fw-bold">Status</label>
+                                            </div>
+                                            <div class="col-md-10 col-sm-10 col-5">
+                                                <select name="status" class="form-control form-control-sm" required>
+                                                    <option value="" selected disabled></option>
+                                                ${statusOptions}
+                                                </select> 
+                                            </div>
+                                        </div>
+                                    `);
+                                }
+                            } else {
+                                $('#status-container').html(''); // Clear the container if status_id === 4
+                            }
+
+                            if (complaintData.status_id === 4) {
+                                $('#action_notes-container').html(''); // Clear the container if status_id === 4
+                            } else if (complaintData.status_id === 2) {
+                                $('#action_notes-container').html(`
+                                    <div class="row mb-1">
+                                        <div class="col-md-2 col-sm-2 col-4">
+                                            <label for="action_notes" class="fw-bold">Tindakan</label>
+                                        </div>
+                                        <div class="col-md-10 col-sm-10 col-8">
+                                            <textarea name="action_notes" id="action_notes" rows="2" class="form-control" required>${complaintData.action_notes ? complaintData.action_notes : ''}</textarea>
+                                        </div>
+                                    </div>
+                                `);
+                            } else {
                                 if (complaintData.action_notes) {
                                     $('#action_notes-container').html(`
                                         <div class="row mb-1">
@@ -397,8 +458,6 @@
                                 } else {
                                     $('#action_notes-container').html('');
                                 }
-                            } else {
-                                $('#action_notes-container').html(''); // Clear the container if status_id === 4
                             }
 
                             if (complaintData.cancel_notes) {
@@ -416,37 +475,23 @@
                                 $('#cancel_notes-container').html('');
                             }
 
-                            if (
-                                complaintData.date_of_action === null &&
-                                complaintData.status_id !== 4 &&
-                                complaintData.section_id !== null
-                            ) {
-                                $('#save-container').html(`
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-sm btn-warning" onclick="printModalContent()">Cetak</button>
-                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                    </div>
-                                `);
-                            } else if (
-                                complaintData.date_of_action === null &&
-                                complaintData.status_id !== 4
-                            ) {
-                                $('#save-container').html(`
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-sm btn-warning" onclick="printModalContent()">Cetak</button>
-                                        <button type="button" class="btn btn-sm btn-danger open-cancel-modal" data-id="${complaintData.id}" data-bs-toggle="modal" data-bs-target="#cancelModal">Batal</button>
-                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
-                                    </div>
-                                `);
-                            } else {
-                                $('#save-container').html(`
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-sm btn-warning" onclick="printModalContent()">Cetak</button>
-                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                                    </div>
-                                `);
+                            let saveButtonsHtml = `
+                                <button type="button" class="btn btn-sm btn-warning" onclick="printModalContent()">Cetak</button>
+                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                            `;
+
+                            if (complaintData.status_id !== 4) {
+                                if (complaintData.date_of_action === null) {
+                                    saveButtonsHtml += `<button type="button" class="btn btn-sm btn-danger open-cancel-modal" data-id="${complaintData.id}" data-bs-toggle="modal" data-bs-target="#cancelModal">Batal</button>`;
+                                }
+                                saveButtonsHtml += `<button type="submit" class="btn btn-sm btn-primary">Simpan</button>`;
                             }
+
+                            $('#save-container').html(`
+                                <div class="modal-footer">
+                                    ${saveButtonsHtml}
+                                </div>
+                            `);
 
                             // Open the modal
                             $('#complaintModal').modal('show');
