@@ -22,6 +22,10 @@
                 <div class="card-body">
                     @csrf
                     <div class="col-md-12 col-sm-12 mb-2">
+                        <label for="">1. Pelajar diwajibkan mengisi no. telefon yang sah.</label>
+                        <label for="">2. Pelajar digalakkan mengisi keterangan di bahagian catatan bagi memudahkan pegawai terlibat mengenal pasti aduan anda.</label>
+                    </div>
+                    <div class="col-md-12 col-sm-12 mb-2">
                         <label for="" class="fw-bold">Maklumat Pelajar</label>
                     </div>
                     <div class="g-2 mb-2">
@@ -78,7 +82,7 @@
                     <div class="row g-2 mb-2 row-cols-1">
                         <div class="col-md-6 col-sm-6 form-floating">
                             <input type="text" name="location" id="location" class="form-control" placeholder="">
-                            <label for="phone">Lokasi</label>
+                            <label for="location">Lokasi</label>
                         </div>
                         <div class="col-md-6 col-sm-6">
                             <label for="" class="fst-italic">*Sila nyatakan lokasi sekiranya aduan melibatkan masalah Wifi. Contoh : A1 - 01</label>
@@ -140,6 +144,17 @@
 
     // Set the current date in the input field
     document.getElementById('date_of_complaint').value = getFormattedDate();
+
+    // Make location field mandatory when complaint type ID 4 is selected
+    document.getElementById('complaintType').addEventListener('change', function() {
+        var locationField = document.getElementById('location');
+        
+        if (this.value == '4') {
+            locationField.setAttribute('required', 'required');
+        } else {
+            locationField.removeAttribute('required');
+        }
+    });
 </script>
 <script>
     (function() {
