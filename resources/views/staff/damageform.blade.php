@@ -27,6 +27,10 @@
                 <div class="card-body">
                     @csrf
                     <div class="col-md-12 col-sm-12 mb-2">
+                        <label for="">1. Staf diwajibkan mengisi no. telefon yang sah.</label>
+                        <label for="">2. Staf digalakkan mengisi keterangan di bahagian catatan bagi memudahkan juruteknik mengenal pasti masalah.</label>
+                    </div>
+                    <div class="col-md-12 col-sm-12 mb-2">
                         <label for="" class="fw-bold">Maklumat Staf</label>
                     </div>
                     <div class="g-2 mb-2">
