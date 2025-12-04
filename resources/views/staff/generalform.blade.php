@@ -13,13 +13,20 @@
                     </ul>
                 </div>
             @endif
+            <div class="alert alert-info">
+                <strong>Perhatian:</strong> Borang ini adalah untuk aduan umum sahaja. Sekiranya ingin melaporkan sebarang kerosakan, sila gunakan <a href="{{ route('staff.damageform') }}" class="alert-link">Borang Aduan Kerosakan</a>.
+            </div>
             <div class="card">
                 <div class="card-header">{{ __('Borang Aduan Umum') }}</div>
                 <form method="POST" action="{{ route('staff.generalform.submit') }}" class="needs-validation" novalidate>
                 <div class="card-body">
                     @csrf
                     <div class="col-md-12 col-sm-12 mb-2">
-                        <label for="" class="fw-bold">Maklumat Staff</label>
+                        <label for="">1. Staf diwajibkan mengisi no. telefon yang sah.</label>
+                        <label for="">2. Staf digalakkan mengisi keterangan di bahagian catatan bagi memudahkan pegawai terlibat mengenal pasti aduan anda.</label>
+                    </div>
+                    <div class="col-md-12 col-sm-12 mb-2">
+                        <label for="" class="fw-bold">Maklumat Staf</label>
                     </div>
                     <div class="g-2 mb-2">
                         <div class="col-md-12 col-sm-12 form-floating">
