@@ -14,18 +14,20 @@ class PICController extends Controller
     }
 
     public function generalComplaintLists()
-    {   
+    {
+        $eduDB = config('database.connections.eduhub.database');
         $pic = Auth::User();
 
         $complaintLists = DB::table('general_complaints')
-            ->join('eduhub.students', 'general_complaints.ic', '=', 'eduhub.students.ic')
+            ->join("$eduDB.students", 'general_complaints.ic', '=', "$eduDB.students.ic")
             ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
             ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
             ->join('status', 'general_complaints.status_id', '=', 'status.id')
-            ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+            ->select(
+                DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 'general_complaints.id',
                 'general_complaints.category',
-                'eduhub.students.name AS complainant_name',
+                "$eduDB.students.name AS complainant_name",
                 'general_complaints.phone_number AS phone_number',
                 'sections.name AS section',
                 'complaint_types.name AS complaint_type',
@@ -39,14 +41,15 @@ class PICController extends Controller
             )->where('general_complaints.section_id', $pic->section_id)
             ->union(
                 DB::table('general_complaints')
-                    ->join('eduhub.users', 'general_complaints.ic', '=', 'eduhub.users.ic')
+                    ->join("$eduDB.users", 'general_complaints.ic', '=', "$eduDB.users.ic")
                     ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
                     ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
                     ->join('status', 'general_complaints.status_id', '=', 'status.id')
-                    ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                    ->select(
+                        DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                         'general_complaints.id',
                         'general_complaints.category',
-                        'eduhub.users.name AS complainant_name', // Change to 'users' table name here
+                        "$eduDB.users.name AS complainant_name", // Change to 'users' table name here
                         'general_complaints.phone_number AS phone_number',
                         'sections.name AS section',
                         'complaint_types.name AS complaint_type',
@@ -62,22 +65,26 @@ class PICController extends Controller
             ->orderBy('created_at', 'DESC') // Order by the field in the combined result
             ->get();
 
+
         return view('pic.generalcomplaint', compact('complaintLists'));
     }
 
     public function generalComplaintDetails(Request $request)
-    {   
+    {
+        $eduDB = config('database.connections.eduhub.database');
+        $mainDB = config('database.connections.mysql.database');
         $id = $request->input('id'); // ID from the request
 
         $complaintLists = DB::table('general_complaints')
-            ->join('eduhub.students', 'general_complaints.ic', '=', 'eduhub.students.ic')
+            ->join("$eduDB.students", 'general_complaints.ic', '=', "$eduDB.students.ic")
             ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
             ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
             ->join('status', 'general_complaints.status_id', '=', 'status.id')
-            ->leftjoin('eaduan.users', 'general_complaints.user_id', '=', 'eaduan.users.id')
-            ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+            ->leftjoin("$mainDB.users", 'general_complaints.user_id', '=', "$mainDB.users.id")
+            ->select(
+                DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 'general_complaints.id AS id',
-                'eduhub.students.name AS complainant_name',
+                "$eduDB.students.name AS complainant_name",
                 'general_complaints.phone_number AS phone_number',
                 'sections.name AS section',
                 'complaint_types.name AS complaint_type',
@@ -90,19 +97,20 @@ class PICController extends Controller
                 'general_complaints.status_id AS status_id',
                 'general_complaints.cancel_notes AS cancel_notes',
                 'general_complaints.location AS location',
-                'eaduan.users.name AS user_name'
+                "$mainDB.users.name AS user_name"
             )
             ->where('general_complaints.id', '=', $id) // Filter by the complaint ID
             ->union(
                 DB::table('general_complaints')
-                    ->join('eduhub.users', 'general_complaints.ic', '=', 'eduhub.users.ic')
+                    ->join("$eduDB.users", 'general_complaints.ic', '=', "$eduDB.users.ic")
                     ->join('sections', 'general_complaints.section_id', '=', 'sections.id')
                     ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
                     ->join('status', 'general_complaints.status_id', '=', 'status.id')
-                    ->leftjoin('eaduan.users', 'general_complaints.user_id', '=', 'eaduan.users.id')
-                    ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                    ->leftjoin("$mainDB.users", 'general_complaints.user_id', '=', "$mainDB.users.id")
+                    ->select(
+                        DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                         'general_complaints.id AS id',
-                        'eduhub.users.name AS complainant_name', // From 'users' table
+                        "$eduDB.users.name AS complainant_name", // From 'users' table
                         'general_complaints.phone_number AS phone_number',
                         'sections.name AS section',
                         'complaint_types.name AS complaint_type',
@@ -115,14 +123,15 @@ class PICController extends Controller
                         'general_complaints.status_id AS status_id',
                         'general_complaints.cancel_notes AS cancel_notes',
                         'general_complaints.location AS location',
-                        'eaduan.users.name AS user_name'
+                        "$mainDB.users.name AS user_name"
                     )
                     ->where('general_complaints.id', '=', $id) // Filter by the complaint ID
             )
             ->get(); // Return a single record
 
+
         //fetch status data
-        $status = DB::table('status')->whereIn('id', [2,3])->get();
+        $status = DB::table('status')->whereIn('id', [2, 3])->get();
 
         if ($request->ajax()) {
             return response()->json(['complaintLists' => $complaintLists, 'status' => $status]);
@@ -131,7 +140,7 @@ class PICController extends Controller
         return view('pic.generalcomplaint', compact('complaintLists', 'status'));
     }
 
-    public function complaintUpdate(Request $request, $id) 
+    public function complaintUpdate(Request $request, $id)
     {
         $pic = Auth::User();
 
@@ -141,9 +150,9 @@ class PICController extends Controller
 
         // Get the existing date_of_action from the database
         $existingComplaint = DB::table('general_complaints')
-                        ->select('date_of_action')
-                        ->where('id', $id)
-                        ->first();
+            ->select('date_of_action')
+            ->where('id', $id)
+            ->first();
 
         // Prepare the data to update
         $updateData = [
@@ -165,7 +174,7 @@ class PICController extends Controller
         return redirect()->route('pic.generalcomplaint')->with('success', 'Aduan telah dikemaskini.');
     }
 
-    public function complaintCancel(Request $request, $id) 
+    public function complaintCancel(Request $request, $id)
     {
         $request->validate([
             'cancel_notes' => 'required|string'

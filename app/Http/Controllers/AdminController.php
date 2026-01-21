@@ -22,7 +22,7 @@ class AdminController extends Controller
         $users = DB::table('users')
             ->join('sections', 'users.section_id', '=', 'sections.id')
             ->select('users.id', 'users.name', 'users.email', 'users.status', 'sections.name AS section')
-            ->where('type',2)
+            ->where('type', 2)
             ->orderBy('users.name')
             ->get();
 
@@ -61,16 +61,18 @@ class AdminController extends Controller
         $request->validate([
             'status' => 'required|boolean', // Ensure it's a boolean (0 or 1)
         ]);
-       
+
         DB::table('users')
-        ->where('users.id', '=', $id)
-        ->update(['status' => $request->input('status')]);
-        
+            ->where('users.id', '=', $id)
+            ->update(['status' => $request->input('status')]);
+
         return redirect()->back()->with('success', 'Status pegawai berjaya dikemaskini.');
     }
 
     public function damageComplaintLists(Request $request)
     {
+        $eduDB = config('database.connections.eduhub.database');
+
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date') ?? $start_date;
         $withStatus = $request->input('status');
@@ -80,97 +82,99 @@ class AdminController extends Controller
         // If start_date is null, set it to today's date
         if (is_null($start_date)) {
             // Set default to 3 days ago, start of the day
-            $start_date = now()->subDays(3)->startOfDay()->format('Y-m-d'); 
-            
+            $start_date = now()->subDays(3)->startOfDay()->format('Y-m-d');
+
             // Set end date to the current time (end of today)
             $end_date = now()->endOfDay()->format('Y-m-d');
         }
 
         $complaintLists = DB::query()
-        ->fromSub(function ($query) use ($start_date, $end_date, $withStatus) { // Pass the dates into the closure
-            $query->from(DB::table('damage_complaints')
-                ->join('eduhub.students', 'damage_complaints.ic', '=', 'eduhub.students.ic')
-                ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
-                ->leftJoin(DB::raw('(SELECT damage_complaint_logs.damage_complaint_id, status.name AS latest_status, status.id AS latest_status_id 
+            ->fromSub(function ($query) use ($start_date, $end_date, $withStatus, $eduDB) { // Pass the dates into the closure
+                $query->from(DB::table('damage_complaints')
+                    ->join("$eduDB.students", 'damage_complaints.ic', '=', "$eduDB.students.ic")
+                    ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
+                    ->leftJoin(DB::raw('(SELECT damage_complaint_logs.damage_complaint_id, status.name AS latest_status, status.id AS latest_status_id 
                                     FROM damage_complaint_logs
                                     JOIN status ON damage_complaint_logs.status_id = status.id
                                     WHERE damage_complaint_logs.id = 
                                     (SELECT MAX(id) FROM damage_complaint_logs AS logs WHERE logs.damage_complaint_id = damage_complaint_logs.damage_complaint_id)
                                     ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
-                ->where('eduhub.students.status', '2')
-                ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date]) // Filter by date_of_complaint
-                 // Filter by date_of_complaint
-                 ->when($withStatus, function ($query) use ($withStatus) {
-                    return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
-                })
-                ->select(
-                    'damage_complaints.id',
-                    'eduhub.students.name AS complainant_name',
-                    'damage_complaints.phone_number',
-                    'damage_types.name AS damage_type',
-                    'damage_complaints.block',
-                    'damage_complaints.no_unit',
-                    'damage_complaints.created_at',
-                    DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
-                    DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
-                    DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
-                    DB::raw("DATEDIFF(NOW(), damage_complaints.date_of_complaint) as days_since_complaint"),
-                    'latest_log.latest_status', 
-                    'latest_log.latest_status_id'
-                )
-                ->union(
-                    DB::table('damage_complaints')
-                        ->join('eduhub.users', 'damage_complaints.ic', '=', 'eduhub.users.ic')
-                        ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
-                        ->leftJoin(DB::raw('(SELECT damage_complaint_logs.damage_complaint_id, status.name AS latest_status, status.id AS latest_status_id  
+                    ->where("$eduDB.students.status", '2')
+                    ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date]) // Filter by date_of_complaint
+                    // Filter by date_of_complaint
+                    ->when($withStatus, function ($query) use ($withStatus) {
+                        return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
+                    })
+                    ->select(
+                        'damage_complaints.id',
+                        "$eduDB.students.name AS complainant_name",
+                        'damage_complaints.phone_number',
+                        'damage_types.name AS damage_type',
+                        'damage_complaints.block',
+                        'damage_complaints.no_unit',
+                        'damage_complaints.created_at',
+                        DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                        DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
+                        DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
+                        DB::raw("DATEDIFF(NOW(), damage_complaints.date_of_complaint) as days_since_complaint"),
+                        'latest_log.latest_status',
+                        'latest_log.latest_status_id'
+                    )
+                    ->union(
+                        DB::table('damage_complaints')
+                            ->join("$eduDB.users", 'damage_complaints.ic', '=', "$eduDB.users.ic")
+                            ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
+                            ->leftJoin(DB::raw('(SELECT damage_complaint_logs.damage_complaint_id, status.name AS latest_status, status.id AS latest_status_id  
                                             FROM damage_complaint_logs
                                             JOIN status ON damage_complaint_logs.status_id = status.id
                                             WHERE damage_complaint_logs.id = 
                                             (SELECT MAX(id) FROM damage_complaint_logs AS logs WHERE logs.damage_complaint_id = damage_complaint_logs.damage_complaint_id)
                                             ) AS latest_log'), 'damage_complaints.id', '=', 'latest_log.damage_complaint_id')
-                        ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date])
-                         // Filter by date_of_complaint
-                        ->when($withStatus, function ($query) use ($withStatus) {
-                            return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
-                        }) // Filter by date_of_complaint
-                        ->select(
-                            'damage_complaints.id',
-                            'eduhub.users.name AS complainant_name',
-                            'damage_complaints.phone_number',
-                            'damage_types.name AS damage_type',
-                            'damage_complaints.block',
-                            'damage_complaints.no_unit',
-                            'damage_complaints.created_at',
-                            DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
-                            DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
-                            DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
-                            DB::raw("DATEDIFF(NOW(), damage_complaints.date_of_complaint) as days_since_complaint"),
-                            'latest_log.latest_status', 
-                            'latest_log.latest_status_id'
-                        )
-                ));
-        }, 'combined_complaint_lists')
-        ->orderBy('combined_complaint_lists.created_at', 'DESC')
-        ->get();
+                            ->whereBetween(DB::raw("CAST(damage_complaints.date_of_complaint AS DATE)"), [$start_date, $end_date])
+                            // Filter by date_of_complaint
+                            ->when($withStatus, function ($query) use ($withStatus) {
+                                return $query->where('latest_log.latest_status_id', '=', $withStatus); // Apply the status filter if provided
+                            }) // Filter by date_of_complaint
+                            ->select(
+                                'damage_complaints.id',
+                                "$eduDB.users.name AS complainant_name",
+                                'damage_complaints.phone_number',
+                                'damage_types.name AS damage_type',
+                                'damage_complaints.block',
+                                'damage_complaints.no_unit',
+                                'damage_complaints.created_at',
+                                DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                                DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
+                                DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
+                                DB::raw("DATEDIFF(NOW(), damage_complaints.date_of_complaint) as days_since_complaint"),
+                                'latest_log.latest_status',
+                                'latest_log.latest_status_id'
+                            )
+                    ));
+            }, 'combined_complaint_lists')
+            ->orderBy('combined_complaint_lists.created_at', 'DESC')
+            ->get();
+
 
         return view('admin.damagecomplaint', compact('complaintLists', 'start_date', 'end_date', 'status'));
     }
 
     public function damageComplaintDetails(Request $request)
     {
+        $eduDB = config('database.connections.eduhub.database');
         $id = $request->input('id');
 
         $complaintLists = DB::query()
-            ->fromSub(function ($query) {
+            ->fromSub(function ($query) use ($eduDB) {
                 $query->from(DB::table('damage_complaints')
-                    ->join('eduhub.students', 'damage_complaints.ic', '=', 'eduhub.students.ic')
+                    ->join("$eduDB.students", 'damage_complaints.ic', '=', "$eduDB.students.ic")
                     ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
                     ->join('damage_type_details', 'damage_complaints.damage_type_detail_id', '=', 'damage_type_details.id')
                     ->leftjoin('technician', 'damage_complaints.technician_id', '=', 'technician.id')
-                    ->where('eduhub.students.status', '2')
+                    ->where("$eduDB.students.status", '2')
                     ->select(
                         'damage_complaints.id AS id',
-                        'eduhub.students.name AS complainant_name',
+                        "$eduDB.students.name AS complainant_name",
                         'damage_complaints.phone_number',
                         'damage_types.name AS damage_type',
                         'damage_type_details.name AS damage_type_detail',
@@ -186,25 +190,25 @@ class AdminController extends Controller
                     )
                     ->union(
                         DB::table('damage_complaints')
-                            ->join('eduhub.users', 'damage_complaints.ic', '=', 'eduhub.users.ic')
+                            ->join("$eduDB.users", 'damage_complaints.ic', '=', "$eduDB.users.ic")
                             ->join('damage_types', 'damage_complaints.damage_type_id', '=', 'damage_types.id')
                             ->join('damage_type_details', 'damage_complaints.damage_type_detail_id', '=', 'damage_type_details.id')
                             ->leftjoin('technician', 'damage_complaints.technician_id', '=', 'technician.id')
                             ->select(
-                            'damage_complaints.id AS id',
-                            'eduhub.users.name AS complainant_name',
-                            'damage_complaints.phone_number',
-                            'damage_types.name AS damage_type',
-                            'damage_type_details.name AS damage_type_detail',
-                            'damage_complaints.notes',
-                            'damage_complaints.block',
-                            'damage_complaints.no_unit',
-                            'damage_complaints.created_at',
-                            DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
-                            DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
-                            DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
-                            'damage_complaints.technician_id',
-                            'technician.name AS technician'
+                                'damage_complaints.id AS id',
+                                "$eduDB.users.name AS complainant_name",
+                                'damage_complaints.phone_number',
+                                'damage_types.name AS damage_type',
+                                'damage_type_details.name AS damage_type_detail',
+                                'damage_complaints.notes',
+                                'damage_complaints.block',
+                                'damage_complaints.no_unit',
+                                'damage_complaints.created_at',
+                                DB::raw("DATE_FORMAT(damage_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                                DB::raw("DATE_FORMAT(damage_complaints.date_of_action, '%d-%m-%Y') as date_of_action"),
+                                DB::raw("DATE_FORMAT(damage_complaints.date_of_completion, '%d-%m-%Y') as date_of_completion"),
+                                'damage_complaints.technician_id',
+                                'technician.name AS technician'
                             )
                     ));
             }, 'combined_damage_lists')
@@ -212,35 +216,40 @@ class AdminController extends Controller
             ->orderBy('combined_damage_lists.created_at', 'DESC') // Order by the field in the combined result
             ->get();
 
-            // Now, we will fetch logs for each complaint
-            $complaintLogs = [];
 
-            foreach ($complaintLists as $complaint) {
-                $logs = DB::table('damage_complaint_logs')
-                    ->join('status', 'damage_complaint_logs.status_id', '=', 'status.id')
-                    ->select(DB::raw("DATE_FORMAT(damage_complaint_logs.created_at, '%d-%m-%Y') as date_of_log"),
-                    'status.name AS log_status', 'damage_complaint_logs.notes AS log_notes')
-                    ->where('damage_complaint_logs.damage_complaint_id', '=', $complaint->id)
-                    ->get();
+        // Now, we will fetch logs for each complaint
+        $complaintLogs = [];
 
-                $complaintLogs[$complaint->id] = $logs; // Store logs with complaint ID as key
-            }
+        foreach ($complaintLists as $complaint) {
+            $logs = DB::table('damage_complaint_logs')
+                ->join('status', 'damage_complaint_logs.status_id', '=', 'status.id')
+                ->select(
+                    DB::raw("DATE_FORMAT(damage_complaint_logs.created_at, '%d-%m-%Y') as date_of_log"),
+                    'status.name AS log_status',
+                    'damage_complaint_logs.notes AS log_notes'
+                )
+                ->where('damage_complaint_logs.damage_complaint_id', '=', $complaint->id)
+                ->get();
 
-            //fetch technician data
-            $technicians = DB::table('technician')->get();
+            $complaintLogs[$complaint->id] = $logs; // Store logs with complaint ID as key
+        }
 
-            //fetch technician data
-            $status = DB::table('status')->get();
+        //fetch technician data
+        $technicians = DB::table('technician')->get();
 
-            if ($request->ajax()) {
-                return response()->json(['complaintLists' => $complaintLists, 'complaintLogs' => $complaintLogs, 'technicians' => $technicians, 'status' => $status]);
-            }
+        //fetch technician data
+        $status = DB::table('status')->get();
+
+        if ($request->ajax()) {
+            return response()->json(['complaintLists' => $complaintLists, 'complaintLogs' => $complaintLogs, 'technicians' => $technicians, 'status' => $status]);
+        }
 
         return view('admin.damagecomplaint', compact('complaintLists', 'complaintLogs', 'technicians', 'status'));
     }
 
     public function generalComplaintLists(Request $request)
-    {   
+    {
+        $eduDB = config('database.connections.eduhub.database');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date') ?? $start_date;
         $withStatus = $request->input('status');
@@ -250,21 +259,22 @@ class AdminController extends Controller
         // If start_date is null, set it to today's date
         if (is_null($start_date)) {
             // Set default to 3 days ago, start of the day
-            $start_date = now()->subDays(3)->startOfDay()->format('Y-m-d'); 
-            
+            $start_date = now()->subDays(3)->startOfDay()->format('Y-m-d');
+
             // Set end date to the current time (end of today)
             $end_date = now()->endOfDay()->format('Y-m-d');
         }
 
         $complaintLists = DB::table('general_complaints')
-            ->join('eduhub.students', 'general_complaints.ic', '=', 'eduhub.students.ic')
+            ->join("$eduDB.students", 'general_complaints.ic', '=', "$eduDB.students.ic")
             ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
             ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
             ->join('status', 'general_complaints.status_id', '=', 'status.id')
-            ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+            ->select(
+                DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 'general_complaints.id',
                 'general_complaints.category',
-                'eduhub.students.name AS complainant_name',
+                "$eduDB.students.name AS complainant_name",
                 'general_complaints.phone_number AS phone_number',
                 'sections.name AS section',
                 'complaint_types.name AS complaint_type',
@@ -281,14 +291,15 @@ class AdminController extends Controller
             })
             ->union(
                 DB::table('general_complaints')
-                    ->join('eduhub.users', 'general_complaints.ic', '=', 'eduhub.users.ic')
+                    ->join("$eduDB.users", 'general_complaints.ic', '=', "$eduDB.users.ic")
                     ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
                     ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
                     ->join('status', 'general_complaints.status_id', '=', 'status.id')
-                    ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                    ->select(
+                        DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                         'general_complaints.id',
                         'general_complaints.category',
-                        'eduhub.users.name AS complainant_name', // Change to 'users' table name here
+                        "$eduDB.users.name AS complainant_name", // Change to 'users' table name here
                         'general_complaints.phone_number AS phone_number',
                         'sections.name AS section',
                         'complaint_types.name AS complaint_type',
@@ -307,22 +318,26 @@ class AdminController extends Controller
             ->orderBy('created_at', 'DESC') // Order by the field in the combined result
             ->get();
 
+
         return view('admin.generalcomplaint', compact('complaintLists', 'start_date', 'end_date', 'status'));
     }
 
     public function generalComplaintDetails(Request $request)
-    {   
+    {
+        $eduDB = config('database.connections.eduhub.database');
+        $mainDB = config('database.connections.mysql.database');
         $id = $request->input('id'); // ID from the request
 
         $complaintLists = DB::table('general_complaints')
-            ->join('eduhub.students', 'general_complaints.ic', '=', 'eduhub.students.ic')
+            ->join("$eduDB.students", 'general_complaints.ic', '=', "$eduDB.students.ic")
             ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
             ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
             ->join('status', 'general_complaints.status_id', '=', 'status.id')
-            ->leftjoin('eaduan.users', 'general_complaints.user_id', '=', 'eaduan.users.id')
-            ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+            ->leftjoin("$mainDB.users", 'general_complaints.user_id', '=', "$mainDB.users.id")
+            ->select(
+                DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                 'general_complaints.id AS id',
-                'eduhub.students.name AS complainant_name',
+                "$eduDB.students.name AS complainant_name",
                 'general_complaints.phone_number AS phone_number',
                 'sections.name AS section',
                 'complaint_types.name AS complaint_type',
@@ -335,20 +350,21 @@ class AdminController extends Controller
                 'general_complaints.user_id AS user_id',
                 'general_complaints.status_id AS status_id',
                 'general_complaints.cancel_notes AS cancel_notes',
-                'eaduan.users.name AS user_name',
+                "$mainDB.users.name AS user_name",
                 'general_complaints.section_id AS section_id'
             )
             ->where('general_complaints.id', '=', $id) // Filter by the complaint ID
             ->union(
                 DB::table('general_complaints')
-                    ->join('eduhub.users', 'general_complaints.ic', '=', 'eduhub.users.ic')
+                    ->join("$eduDB.users", 'general_complaints.ic', '=', "$eduDB.users.ic")
                     ->leftjoin('sections', 'general_complaints.section_id', '=', 'sections.id')
                     ->join('complaint_types', 'general_complaints.complaint_type_id', '=', 'complaint_types.id')
                     ->join('status', 'general_complaints.status_id', '=', 'status.id')
-                    ->leftjoin('eaduan.users', 'general_complaints.user_id', '=', 'eaduan.users.id')
-                    ->select(DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
+                    ->leftjoin("$mainDB.users", 'general_complaints.user_id', '=', "$mainDB.users.id")
+                    ->select(
+                        DB::raw("DATE_FORMAT(general_complaints.created_at, '%d-%m-%Y %H:%i:%s') as date_of_complaint"),
                         'general_complaints.id AS id',
-                        'eduhub.users.name AS complainant_name', // From 'users' table
+                        "$eduDB.users.name AS complainant_name", // From 'users' table
                         'general_complaints.phone_number AS phone_number',
                         'sections.name AS section',
                         'complaint_types.name AS complaint_type',
@@ -361,20 +377,21 @@ class AdminController extends Controller
                         'general_complaints.user_id AS user_id',
                         'general_complaints.status_id AS status_id',
                         'general_complaints.cancel_notes AS cancel_notes',
-                        'eaduan.users.name AS user_name',
+                        "$mainDB.users.name AS user_name",
                         'general_complaints.section_id AS section_id'
                     )
                     ->where('general_complaints.id', '=', $id) // Filter by the complaint ID
             )
             ->get(); // Return a single record
 
-        $users = DB::table('users')->where('type',2)->orderBy('name')->get();
+
+        $users = DB::table('users')->where('type', 2)->orderBy('name')->get();
 
         //fetch section
         $sections = DB::table('sections')->get();
 
         //fetch status data
-        $status = DB::table('status')->whereIn('id', [2,3])->get();
+        $status = DB::table('status')->whereIn('id', [2, 3])->get();
 
         if ($request->ajax()) {
             return response()->json(['complaintLists' => $complaintLists, 'users' => $users, 'sections' => $sections, 'status' => $status]);
@@ -383,7 +400,7 @@ class AdminController extends Controller
         return view('admin.generalcomplaint', compact('complaintLists', 'users', 'sections', 'status'));
     }
 
-    public function complaintUpdate(Request $request, $id) 
+    public function complaintUpdate(Request $request, $id)
     {
 
         $complaint = DB::table('general_complaints')
@@ -449,7 +466,7 @@ class AdminController extends Controller
         return redirect()->route('admin.generalcomplaint')->with('success', 'Aduan telah dikemaskini dan diserahkan kepada bahagian / unit yang terlibat.');
     }
 
-    public function complaintCancel(Request $request, $id) 
+    public function complaintCancel(Request $request, $id)
     {
         $request->validate([
             'cancel_notes' => 'required|string'
@@ -474,7 +491,7 @@ class AdminController extends Controller
 
         // Get the date range based on the provided month or the last 7 days
         if (is_null($month)) {
-            $dates = collect(range(7, 0))->map(function($i) {
+            $dates = collect(range(7, 0))->map(function ($i) {
                 return Carbon::now()->subDays($i)->format('Y-m-d');
             });
         } else {
@@ -505,7 +522,7 @@ class AdminController extends Controller
             ->select('dc.damage_type_id', 'dcl.status_id', DB::raw('COUNT(*) as total'), DB::raw('DATE_FORMAT(dc.date_of_complaint, "%Y-%m-%d") as complaint_date'))
             ->whereIn('dcl.status_id', $status->pluck('id'))
             ->whereIn(DB::raw('DATE_FORMAT(dc.date_of_complaint, "%Y-%m-%d")'), $dates)
-            ->whereIn(DB::raw('dcl.id'), function($query) {
+            ->whereIn(DB::raw('dcl.id'), function ($query) {
                 $query->select(DB::raw('MAX(id)'))
                     ->from('damage_complaint_logs')
                     ->groupBy('damage_complaint_id');
@@ -587,11 +604,11 @@ class AdminController extends Controller
             // Count the total number of complaints
             $totals = DB::table('general_complaints')
                 ->whereBetween('general_complaints.date_of_complaint', [$firstDate, $lastDate]) // Filter between the first and last date
-                ->count(); 
+                ->count();
 
             foreach ($dates as $date) {
                 foreach ($status as $stat) {
-                    
+
                     $totalCountCategoryTypeStatus = DB::table('general_complaints')
                         ->where('general_complaints.category', '=', $categoryType)
                         ->whereRaw('DATE_FORMAT(general_complaints.date_of_complaint, "%Y-%m-%d") = ?', [$date])
@@ -610,10 +627,8 @@ class AdminController extends Controller
                     $totalByStatus[$date][$stat->id] = [
                         'total' => $totalCountStatus
                     ];
-
                 }
             }
-
         }
 
         // Initialize arrays for totals
@@ -630,7 +645,7 @@ class AdminController extends Controller
 
             foreach ($dates as $date) {
                 foreach ($status as $stat) {
-                    
+
                     $totalCountComplaintTypeStatus = DB::table('general_complaints')
                         ->where('general_complaints.complaint_type_id', '=', $complaintType->id)
                         ->whereRaw('DATE_FORMAT(general_complaints.date_of_complaint, "%Y-%m-%d") = ?', [$date])
@@ -649,10 +664,8 @@ class AdminController extends Controller
                     $totalByComplaintStatus[$date][$stat->id] = [
                         'total' => $totalCountComplaintStatus
                     ];
-
                 }
             }
-
         }
 
         // Pass data to the view
