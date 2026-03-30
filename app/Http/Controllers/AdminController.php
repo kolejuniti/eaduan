@@ -9,187 +9,197 @@ use DateTime;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class AdminController extends Controller
 {
     public function dashboard()
     {
-        $eduDB = config('database.connections.eduhub.database');
+        $cacheKey = 'admin.dashboard.stats';
+        $cacheTtl = 60; // seconds
 
-        $latestDamageStatusSubquery = DB::table('damage_complaint_logs as dcl')
-            ->select('dcl.damage_complaint_id', 'dcl.status_id')
-            ->whereRaw('dcl.id = (SELECT MAX(id) FROM damage_complaint_logs WHERE damage_complaint_id = dcl.damage_complaint_id)');
+        $data = Cache::remember($cacheKey, $cacheTtl, function () {
+            $eduDB = config('database.connections.eduhub.database');
 
-        $damageSummary = DB::table('damage_complaints as dc')
-            ->leftJoinSub($latestDamageStatusSubquery, 'latest_log', function ($join) {
-                $join->on('dc.id', '=', 'latest_log.damage_complaint_id');
-            })
-            ->selectRaw('COUNT(*) as total_count')
-            ->selectRaw('SUM(CASE WHEN COALESCE(latest_log.status_id, 1) = 1 THEN 1 ELSE 0 END) as new_count')
-            ->selectRaw('SUM(CASE WHEN latest_log.status_id = 2 THEN 1 ELSE 0 END) as in_progress_count')
-            ->selectRaw('SUM(CASE WHEN latest_log.status_id = 3 THEN 1 ELSE 0 END) as completed_count')
-            ->selectRaw('SUM(CASE WHEN latest_log.status_id = 4 THEN 1 ELSE 0 END) as cancelled_count')
-            ->first();
+            $latestDamageStatusSubquery = DB::table('damage_complaint_logs as dcl')
+                ->select('dcl.damage_complaint_id', 'dcl.status_id')
+                ->whereRaw('dcl.id = (SELECT MAX(id) FROM damage_complaint_logs WHERE damage_complaint_id = dcl.damage_complaint_id)');
 
-        $generalSummary = DB::table('general_complaints')
-            ->selectRaw('COUNT(*) as total_count')
-            ->selectRaw('SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as new_count')
-            ->selectRaw('SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as in_progress_count')
-            ->selectRaw('SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as completed_count')
-            ->selectRaw('SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as cancelled_count')
-            ->first();
+            $damageSummary = DB::table('damage_complaints as dc')
+                ->leftJoinSub($latestDamageStatusSubquery, 'latest_log', function ($join) {
+                    $join->on('dc.id', '=', 'latest_log.damage_complaint_id');
+                })
+                ->selectRaw('COUNT(*) as total_count')
+                ->selectRaw('SUM(CASE WHEN COALESCE(latest_log.status_id, 1) = 1 THEN 1 ELSE 0 END) as new_count')
+                ->selectRaw('SUM(CASE WHEN latest_log.status_id = 2 THEN 1 ELSE 0 END) as in_progress_count')
+                ->selectRaw('SUM(CASE WHEN latest_log.status_id = 3 THEN 1 ELSE 0 END) as completed_count')
+                ->selectRaw('SUM(CASE WHEN latest_log.status_id = 4 THEN 1 ELSE 0 END) as cancelled_count')
+                ->first();
 
-        $today = Carbon::today();
-        $startOfWeek = Carbon::now()->startOfWeek();
-        $startOfMonth = Carbon::now()->startOfMonth();
+            $generalSummary = DB::table('general_complaints')
+                ->selectRaw('COUNT(*) as total_count')
+                ->selectRaw('SUM(CASE WHEN status_id = 1 THEN 1 ELSE 0 END) as new_count')
+                ->selectRaw('SUM(CASE WHEN status_id = 2 THEN 1 ELSE 0 END) as in_progress_count')
+                ->selectRaw('SUM(CASE WHEN status_id = 3 THEN 1 ELSE 0 END) as completed_count')
+                ->selectRaw('SUM(CASE WHEN status_id = 4 THEN 1 ELSE 0 END) as cancelled_count')
+                ->first();
 
-        $damageTodayCount = DB::table('damage_complaints')
-            ->whereDate('created_at', $today)
-            ->count();
-        $generalTodayCount = DB::table('general_complaints')
-            ->whereDate('created_at', $today)
-            ->count();
-        $damageWeekCount = DB::table('damage_complaints')
-            ->whereDate('created_at', '>=', $startOfWeek)
-            ->count();
-        $generalWeekCount = DB::table('general_complaints')
-            ->whereDate('created_at', '>=', $startOfWeek)
-            ->count();
-        $damageMonthCount = DB::table('damage_complaints')
-            ->whereDate('created_at', '>=', $startOfMonth)
-            ->count();
-        $generalMonthCount = DB::table('general_complaints')
-            ->whereDate('created_at', '>=', $startOfMonth)
-            ->count();
+            $today = Carbon::today();
+            $startOfToday = $today->copy()->startOfDay();
+            $endOfToday = $today->copy()->endOfDay();
+            $startOfWeek = Carbon::now()->startOfWeek()->startOfDay();
+            $startOfMonth = Carbon::now()->startOfMonth()->startOfDay();
 
-        $trendStartDate = Carbon::today()->subDays(29);
-        $trendLabels = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $trendLabels[] = Carbon::today()->subDays($i)->format('d M');
-        }
+            $damageTodayCount = DB::table('damage_complaints')
+                ->whereBetween('created_at', [$startOfToday, $endOfToday])
+                ->count();
+            $generalTodayCount = DB::table('general_complaints')
+                ->whereBetween('created_at', [$startOfToday, $endOfToday])
+                ->count();
+            $damageWeekCount = DB::table('damage_complaints')
+                ->where('created_at', '>=', $startOfWeek)
+                ->count();
+            $generalWeekCount = DB::table('general_complaints')
+                ->where('created_at', '>=', $startOfWeek)
+                ->count();
+            $damageMonthCount = DB::table('damage_complaints')
+                ->where('created_at', '>=', $startOfMonth)
+                ->count();
+            $generalMonthCount = DB::table('general_complaints')
+                ->where('created_at', '>=', $startOfMonth)
+                ->count();
 
-        $damageTrendRaw = DB::table('damage_complaints')
-            ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
-            ->whereDate('created_at', '>=', $trendStartDate)
-            ->groupBy('day')
-            ->pluck('total', 'day');
+            $trendStartDate = Carbon::today()->subDays(29)->startOfDay();
+            $trendLabels = [];
+            for ($i = 29; $i >= 0; $i--) {
+                $trendLabels[] = Carbon::today()->subDays($i)->format('d M');
+            }
 
-        $generalTrendRaw = DB::table('general_complaints')
-            ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
-            ->whereDate('created_at', '>=', $trendStartDate)
-            ->groupBy('day')
-            ->pluck('total', 'day');
+            $damageTrendRaw = DB::table('damage_complaints')
+                ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
+                ->where('created_at', '>=', $trendStartDate)
+                ->groupBy('day')
+                ->pluck('total', 'day');
 
-        $damageTrendData = [];
-        $generalTrendData = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $day = Carbon::today()->subDays($i)->format('Y-m-d');
-            $damageTrendData[] = (int) ($damageTrendRaw[$day] ?? 0);
-            $generalTrendData[] = (int) ($generalTrendRaw[$day] ?? 0);
-        }
+            $generalTrendRaw = DB::table('general_complaints')
+                ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
+                ->where('created_at', '>=', $trendStartDate)
+                ->groupBy('day')
+                ->pluck('total', 'day');
 
-        $latestDamageComplaints = DB::query()
-            ->fromSub(function ($query) use ($eduDB, $latestDamageStatusSubquery) {
-                $query->from(
-                    DB::table('damage_complaints as dc')
-                        ->join("$eduDB.students", 'dc.ic', '=', "$eduDB.students.ic")
-                        ->join('damage_types as dt', 'dc.damage_type_id', '=', 'dt.id')
-                        ->leftJoinSub($latestDamageStatusSubquery, 'latest_log', function ($join) {
-                            $join->on('dc.id', '=', 'latest_log.damage_complaint_id');
-                        })
-                        ->leftJoin('status as st', 'latest_log.status_id', '=', 'st.id')
-                        ->where("$eduDB.students.status", '2')
-                        ->select(
-                            'dc.id',
-                            "$eduDB.students.name AS complainant_name",
-                            'dt.name as complaint_type',
-                            'dc.block',
-                            'dc.no_unit',
-                            'dc.created_at',
-                            DB::raw("DATE_FORMAT(dc.created_at, '%d-%m-%Y %H:%i') as reported_at"),
-                            DB::raw("COALESCE(st.name, 'Baru') as status_name")
-                        )
-                        ->union(
-                            DB::table('damage_complaints as dc')
-                                ->join("$eduDB.users", 'dc.ic', '=', "$eduDB.users.ic")
-                                ->join('damage_types as dt', 'dc.damage_type_id', '=', 'dt.id')
-                                ->leftJoinSub($latestDamageStatusSubquery, 'latest_log', function ($join) {
-                                    $join->on('dc.id', '=', 'latest_log.damage_complaint_id');
-                                })
-                                ->leftJoin('status as st', 'latest_log.status_id', '=', 'st.id')
-                                ->select(
-                                    'dc.id',
-                                    "$eduDB.users.name AS complainant_name",
-                                    'dt.name as complaint_type',
-                                    'dc.block',
-                                    'dc.no_unit',
-                                    'dc.created_at',
-                                    DB::raw("DATE_FORMAT(dc.created_at, '%d-%m-%Y %H:%i') as reported_at"),
-                                    DB::raw("COALESCE(st.name, 'Baru') as status_name")
-                                )
-                        )
-                );
-            }, 'latest_damage')
-            ->orderByDesc('created_at')
-            ->limit(5)
-            ->get();
+            $damageTrendData = [];
+            $generalTrendData = [];
+            for ($i = 29; $i >= 0; $i--) {
+                $day = Carbon::today()->subDays($i)->format('Y-m-d');
+                $damageTrendData[] = (int) ($damageTrendRaw[$day] ?? 0);
+                $generalTrendData[] = (int) ($generalTrendRaw[$day] ?? 0);
+            }
 
-        $latestGeneralComplaints = DB::query()
-            ->fromSub(function ($query) use ($eduDB) {
-                $query->from(
-                    DB::table('general_complaints as gc')
-                        ->join("$eduDB.students", 'gc.ic', '=', "$eduDB.students.ic")
-                        ->join('complaint_types as ct', 'gc.complaint_type_id', '=', 'ct.id')
-                        ->leftJoin('status as st', 'gc.status_id', '=', 'st.id')
-                        ->select(
-                            'gc.id',
-                            "$eduDB.students.name AS complainant_name",
-                            'ct.name as complaint_type',
-                            'gc.location',
-                            'gc.created_at',
-                            DB::raw("DATE_FORMAT(gc.created_at, '%d-%m-%Y %H:%i') as reported_at"),
-                            'st.name as status_name'
-                        )
-                        ->union(
-                            DB::table('general_complaints as gc')
-                                ->join("$eduDB.users", 'gc.ic', '=', "$eduDB.users.ic")
-                                ->join('complaint_types as ct', 'gc.complaint_type_id', '=', 'ct.id')
-                                ->leftJoin('status as st', 'gc.status_id', '=', 'st.id')
-                                ->select(
-                                    'gc.id',
-                                    "$eduDB.users.name AS complainant_name",
-                                    'ct.name as complaint_type',
-                                    'gc.location',
-                                    'gc.created_at',
-                                    DB::raw("DATE_FORMAT(gc.created_at, '%d-%m-%Y %H:%i') as reported_at"),
-                                    'st.name as status_name'
-                                )
-                        )
-                );
-            }, 'latest_general')
-            ->orderByDesc('created_at')
-            ->limit(5)
-            ->get();
+            $latestDamageComplaints = DB::query()
+                ->fromSub(function ($query) use ($eduDB, $latestDamageStatusSubquery) {
+                    $query->from(
+                        DB::table('damage_complaints as dc')
+                            ->join("$eduDB.students", 'dc.ic', '=', "$eduDB.students.ic")
+                            ->join('damage_types as dt', 'dc.damage_type_id', '=', 'dt.id')
+                            ->leftJoinSub($latestDamageStatusSubquery, 'latest_log', function ($join) {
+                                $join->on('dc.id', '=', 'latest_log.damage_complaint_id');
+                            })
+                            ->leftJoin('status as st', 'latest_log.status_id', '=', 'st.id')
+                            ->where("$eduDB.students.status", '2')
+                            ->select(
+                                'dc.id',
+                                "$eduDB.students.name AS complainant_name",
+                                'dt.name as complaint_type',
+                                'dc.block',
+                                'dc.no_unit',
+                                'dc.created_at',
+                                DB::raw("DATE_FORMAT(dc.created_at, '%d-%m-%Y %H:%i') as reported_at"),
+                                DB::raw("COALESCE(st.name, 'Baru') as status_name")
+                            )
+                            ->unionAll(
+                                DB::table('damage_complaints as dc')
+                                    ->join("$eduDB.users", 'dc.ic', '=', "$eduDB.users.ic")
+                                    ->join('damage_types as dt', 'dc.damage_type_id', '=', 'dt.id')
+                                    ->leftJoinSub($latestDamageStatusSubquery, 'latest_log', function ($join) {
+                                        $join->on('dc.id', '=', 'latest_log.damage_complaint_id');
+                                    })
+                                    ->leftJoin('status as st', 'latest_log.status_id', '=', 'st.id')
+                                    ->select(
+                                        'dc.id',
+                                        "$eduDB.users.name AS complainant_name",
+                                        'dt.name as complaint_type',
+                                        'dc.block',
+                                        'dc.no_unit',
+                                        'dc.created_at',
+                                        DB::raw("DATE_FORMAT(dc.created_at, '%d-%m-%Y %H:%i') as reported_at"),
+                                        DB::raw("COALESCE(st.name, 'Baru') as status_name")
+                                    )
+                            )
+                    );
+                }, 'latest_damage')
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get();
 
-        $stats = [
-            'damage_total' => (int) ($damageSummary->total_count ?? 0),
-            'general_total' => (int) ($generalSummary->total_count ?? 0),
-            'all_total' => (int) ($damageSummary->total_count ?? 0) + (int) ($generalSummary->total_count ?? 0),
-            'open_total' => (int) ($damageSummary->new_count ?? 0) + (int) ($damageSummary->in_progress_count ?? 0) + (int) ($generalSummary->new_count ?? 0) + (int) ($generalSummary->in_progress_count ?? 0),
-            'today_total' => $damageTodayCount + $generalTodayCount,
-            'week_total' => $damageWeekCount + $generalWeekCount,
-            'month_total' => $damageMonthCount + $generalMonthCount,
-            'damage_new' => (int) ($damageSummary->new_count ?? 0),
-            'damage_progress' => (int) ($damageSummary->in_progress_count ?? 0),
-            'damage_completed' => (int) ($damageSummary->completed_count ?? 0),
-            'damage_cancelled' => (int) ($damageSummary->cancelled_count ?? 0),
-            'general_new' => (int) ($generalSummary->new_count ?? 0),
-            'general_progress' => (int) ($generalSummary->in_progress_count ?? 0),
-            'general_completed' => (int) ($generalSummary->completed_count ?? 0),
-            'general_cancelled' => (int) ($generalSummary->cancelled_count ?? 0),
-        ];
+            $latestGeneralComplaints = DB::query()
+                ->fromSub(function ($query) use ($eduDB) {
+                    $query->from(
+                        DB::table('general_complaints as gc')
+                            ->join("$eduDB.students", 'gc.ic', '=', "$eduDB.students.ic")
+                            ->join('complaint_types as ct', 'gc.complaint_type_id', '=', 'ct.id')
+                            ->leftJoin('status as st', 'gc.status_id', '=', 'st.id')
+                            ->select(
+                                'gc.id',
+                                "$eduDB.students.name AS complainant_name",
+                                'ct.name as complaint_type',
+                                'gc.location',
+                                'gc.created_at',
+                                DB::raw("DATE_FORMAT(gc.created_at, '%d-%m-%Y %H:%i') as reported_at"),
+                                'st.name as status_name'
+                            )
+                            ->unionAll(
+                                DB::table('general_complaints as gc')
+                                    ->join("$eduDB.users", 'gc.ic', '=', "$eduDB.users.ic")
+                                    ->join('complaint_types as ct', 'gc.complaint_type_id', '=', 'ct.id')
+                                    ->leftJoin('status as st', 'gc.status_id', '=', 'st.id')
+                                    ->select(
+                                        'gc.id',
+                                        "$eduDB.users.name AS complainant_name",
+                                        'ct.name as complaint_type',
+                                        'gc.location',
+                                        'gc.created_at',
+                                        DB::raw("DATE_FORMAT(gc.created_at, '%d-%m-%Y %H:%i') as reported_at"),
+                                        'st.name as status_name'
+                                    )
+                            )
+                    );
+                }, 'latest_general')
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get();
 
-        return view('admin.dashboard', compact('stats', 'latestDamageComplaints', 'latestGeneralComplaints', 'trendLabels', 'damageTrendData', 'generalTrendData'));
+            $stats = [
+                'damage_total' => (int) ($damageSummary->total_count ?? 0),
+                'general_total' => (int) ($generalSummary->total_count ?? 0),
+                'all_total' => (int) ($damageSummary->total_count ?? 0) + (int) ($generalSummary->total_count ?? 0),
+                'open_total' => (int) ($damageSummary->new_count ?? 0) + (int) ($damageSummary->in_progress_count ?? 0) + (int) ($generalSummary->new_count ?? 0) + (int) ($generalSummary->in_progress_count ?? 0),
+                'today_total' => $damageTodayCount + $generalTodayCount,
+                'week_total' => $damageWeekCount + $generalWeekCount,
+                'month_total' => $damageMonthCount + $generalMonthCount,
+                'damage_new' => (int) ($damageSummary->new_count ?? 0),
+                'damage_progress' => (int) ($damageSummary->in_progress_count ?? 0),
+                'damage_completed' => (int) ($damageSummary->completed_count ?? 0),
+                'damage_cancelled' => (int) ($damageSummary->cancelled_count ?? 0),
+                'general_new' => (int) ($generalSummary->new_count ?? 0),
+                'general_progress' => (int) ($generalSummary->in_progress_count ?? 0),
+                'general_completed' => (int) ($generalSummary->completed_count ?? 0),
+                'general_cancelled' => (int) ($generalSummary->cancelled_count ?? 0),
+            ];
+
+            return compact('stats', 'latestDamageComplaints', 'latestGeneralComplaints', 'trendLabels', 'damageTrendData', 'generalTrendData');
+        });
+
+        return view('admin.dashboard', $data);
     }
 
     public function user()
