@@ -16,7 +16,7 @@ class AdminController extends Controller
     public function dashboard()
     {
         $cacheKey = 'admin.dashboard.stats';
-        $cacheTtl = 60; // seconds
+        $cacheTtl = 600; // seconds
 
         $data = Cache::remember($cacheKey, $cacheTtl, function () {
             $eduDB = config('database.connections.eduhub.database');
