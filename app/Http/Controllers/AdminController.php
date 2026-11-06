@@ -693,8 +693,9 @@ class AdminController extends Controller
         $lastDate = $dates->last();    // Last date in the collection
 
         // Fetch damage types and statuses
+        $allDamageTypes = DB::table('damage_types')->get();
         if ($damagetype === null) {
-            $damageTypes = DB::table('damage_types')->get();
+            $damageTypes = $allDamageTypes;
         } else {
             $damageTypes = DB::table('damage_types')->where('damage_types.id', $damagetype)->get();
         }
@@ -719,6 +720,8 @@ class AdminController extends Controller
         $totalByDamageStatus = [];
         $totalByStatus = [];
 
+        $damageTypeIds = $damageTypes->pluck('id');
+
         foreach ($damageTypes as $damageType) {
             foreach ($dates as $date) {
                 foreach ($status as $stat) {
@@ -732,7 +735,8 @@ class AdminController extends Controller
                         'status_name' => $stat->name
                     ];
 
-                    $totalCountStatus = $latestLogs->where('complaint_date', $date)
+                    $totalCountStatus = $latestLogs->whereIn('damage_type_id', $damageTypeIds)
+                        ->where('complaint_date', $date)
                         ->where('status_id', $stat->id)
                         ->sum('total');
 
@@ -744,8 +748,31 @@ class AdminController extends Controller
             }
         }
 
+        // Summary of Baru, Dalam Proses, Selesai
+        $statusSummary = [];
+        $grandTotal = 0;
+
+        foreach ($status as $stat) {
+            $total = 0;
+            foreach ($damageTypes as $damageType) {
+                foreach ($dates as $date) {
+                    $total += $totalByDamageStatus[$damageType->id][$date][$stat->id]['total'] ?? 0;
+                }
+            }
+            $statusSummary[$stat->id] = [
+                'id' => $stat->id,
+                'name' => $stat->name,
+                'total' => $total,
+            ];
+            $grandTotal += $total;
+        }
+
+        foreach ($statusSummary as $id => $item) {
+            $statusSummary[$id]['percentage'] = $grandTotal > 0 ? round(($item['total'] / $grandTotal) * 100, 1) : 0;
+        }
+
         // Pass data to the view
-        return view('admin.damagereport', compact('dates', 'status', 'damageTypes', 'totalByDamageStatus', 'totalByStatus', 'firstDate', 'lastDate', 'damagetype'));
+        return view('admin.damagereport', compact('dates', 'status', 'damageTypes', 'allDamageTypes', 'totalByDamageStatus', 'totalByStatus', 'firstDate', 'lastDate', 'damagetype', 'statusSummary', 'grandTotal'));
     }
 
     public function generalReport(Request $request)
@@ -853,7 +880,28 @@ class AdminController extends Controller
             }
         }
 
+        // Summary of Baru, Dalam Proses, Selesai
+        $statusSummary = [];
+        $grandTotal = 0;
+
+        foreach ($status as $stat) {
+            $total = 0;
+            foreach ($dates as $date) {
+                $total += $totalByStatus[$date][$stat->id]['total'] ?? 0;
+            }
+            $statusSummary[$stat->id] = [
+                'id' => $stat->id,
+                'name' => $stat->name,
+                'total' => $total,
+            ];
+            $grandTotal += $total;
+        }
+
+        foreach ($statusSummary as $id => $item) {
+            $statusSummary[$id]['percentage'] = $grandTotal > 0 ? round(($item['total'] / $grandTotal) * 100, 1) : 0;
+        }
+
         // Pass data to the view
-        return view('admin.generalreport', compact('dates', 'status', 'categoryTypes', 'totalByCategoryTypeStatus', 'totalByStatus', 'complaintTypes', 'totalByComplaintTypeStatus', 'totalByComplaintStatus', 'firstDate', 'lastDate'));
+        return view('admin.generalreport', compact('dates', 'status', 'categoryTypes', 'totalByCategoryTypeStatus', 'totalByStatus', 'complaintTypes', 'totalByComplaintTypeStatus', 'totalByComplaintStatus', 'firstDate', 'lastDate', 'statusSummary', 'grandTotal'));
     }
 }
